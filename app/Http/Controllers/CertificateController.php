@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Biodata;
 use App\Models\Certificate;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -92,5 +93,74 @@ class CertificateController extends Controller
         $certificate->delete();
         
         return $this->success(null, 'Certificate deleted successfully', 200);
+    }
+    /**
+     * Show certificate user
+     */
+    public function getCertificate()
+    {
+        try {
+            $no_document = request()->input('no_document');
+            $type_document = request()->input('type_document');
+            
+            $data = Biodata::with(['certificate' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }])->where('no_document', $no_document)->first();
+
+            $data->url_qr_code = env('APP_URL') . "/index.php/welcome/check_document?t=" . $data->no_document;
+            $data->date_of_birth = $this->formatDate($data->date_of_birth);
+            
+            if ($data->certificate) {
+                foreach ($data->certificate as $certificate) {
+                    $certificate->start_date = $this->formatDate($certificate->start_date);
+                    $certificate->expired_date = $this->formatDate($certificate->expired_date);
+                    $certificate->next_booster = $this->formatDate($certificate->next_booster);
+                    $certificate->facility = $data->facility;
+                }
+            }
+
+            return $this->success($data, "Successfully get certificate", 200);
+        } catch (\Exception $e) {
+            return $this->error("Failed fetch certificate", 500);
+        }
+    }
+    
+    /**
+     * Helper format date
+     */
+    public function formatDate($date)
+    {
+        if (!$date) return '';
+        
+        $dateObj = \Carbon\Carbon::parse($date);
+        $day = $dateObj->day;
+        $month = $dateObj->format('F');
+        $year = $dateObj->year;
+        
+        // Add ordinal suffix to day
+        $dayWithSuffix = $this->addOrdinalSuffix($day);
+        
+        return $dayWithSuffix . ' ' . $month . ' ' . $year;
+    }
+    
+    /**
+     * Add ordinal suffix to number
+     */
+    private function addOrdinalSuffix($number)
+    {
+        if ($number >= 11 && $number <= 13) {
+            return $number . 'th';
+        }
+        
+        switch ($number % 10) {
+            case 1:
+                return $number . 'st';
+            case 2:
+                return $number . 'nd';
+            case 3:
+                return $number . 'rd';
+            default:
+                return $number . 'th';
+        }
     }
 }

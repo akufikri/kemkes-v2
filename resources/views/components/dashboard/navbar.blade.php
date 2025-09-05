@@ -9,13 +9,13 @@
         </a>
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
-                <li class="dropdown user user-menu">
+                <li class="dropdown ">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="hidden-xs">Alexander Pierce</span>
+                        <span class="user-name" id="user-dropdown-name">Loading...</span>
                     </a>
                     <ul class="dropdown-menu" style="width: 50px">
-                        <li class="user-footer">
-                            <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                        <li class="user-footer" style="padding: 5px">
+                            <a href="#" id="logout-btn" class="btn btn-default btn-flat text-primary" style="color: black;">Sign out</a>
                         </li>
                     </ul>
                 </li>

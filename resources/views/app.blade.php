@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Sinkarkes | @yield('title')</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('template/bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('template/bower_components/font-awesome/css/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ asset('template/bower_components/Ionicons/css/ionicons.min.css') }}">
@@ -47,6 +48,57 @@
     <script src="{{ asset('template/bower_components/chart.js/Chart.js') }}"></script>
     <script src="{{ asset('template/dist/js/pages/dashboard2.js') }}"></script>
     <script src="{{ asset('template/dist/js/demo.js') }}"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Fetch user data on page load
+            fetchUserData();
+            
+            // Logout handler
+            $(document).on('click', '#logout-btn', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        });
+        
+        function fetchUserData() {
+            $.ajax({
+                url: '/api/me',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success && response.data.user) {
+                        const user = response.data.user;
+                        $('.user-name').text(user.name || user.email);
+                        $('#user-dropdown-name').text(user.name || user.email);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 401 || xhr.status === 404) {
+                        window.location.href = '/login';
+                    }
+                }
+            });
+        }
+        
+        function logout() {
+            $.ajax({
+                url: '/api/logout',
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = '/login';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error during logout. Please try again.');
+                }
+            });
+        }
+    </script>
+    
     @stack('script')
 </body>
 </html>

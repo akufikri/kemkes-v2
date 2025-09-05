@@ -46,4 +46,49 @@ class AuthController extends Controller
             return $this->error("Internal server error", null, 500);
         }
     }
+
+    public function me()
+    {
+        try {
+            $token = session('jwt_token');
+            
+            if (!$token) {
+                return $this->error('Token not found', null, 401);
+            }
+
+            JWTAuth::setToken($token);
+            $user = JWTAuth::authenticate();
+
+            if (!$user) {
+                return $this->error('User not found', null, 404);
+            }
+
+            return $this->success([
+                'user' => $user
+            ], 'User data retrieved successfully', 200);
+
+        } catch (\Exception $e) {
+            return $this->error("Internal server error", null, 500);
+        }
+    }
+
+    public function logout()
+    {
+        try {
+            $token = session('jwt_token');
+            
+            if ($token) {
+                JWTAuth::setToken($token);
+                JWTAuth::invalidate();
+            }
+
+            session()->forget('jwt_token');
+            session()->flush();
+
+            return $this->success(null, 'Logout successful', 200);
+
+        } catch (\Exception $e) {
+            return $this->error("Internal server error", null, 500);
+        }
+    }
 }

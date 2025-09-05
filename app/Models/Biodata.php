@@ -26,4 +26,7 @@ class Biodata extends Model
     {
         return $this->belongsTo(TypeDocument::class, 'id_type_document');
     }
+    public function certificate() {
+        return $this->hasMany(Certificate::class, 'id_biodata');
+    }
 }

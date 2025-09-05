@@ -22,7 +22,8 @@
             </div>
         </div>
         <div class="box-body">
-            <table id="certificateTable" class="table table-bordered table-striped">
+           <div class="table-responsive">
+             <table id="certificateTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>No</th>
@@ -38,6 +39,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
+           </div>
         </div>
         <div class="box-footer"></div>
     </div>
@@ -213,6 +215,12 @@
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
                                     <i class="fa fa-edit"></i> Edit
                                 </button>
+                                <button class="btn btn-sm btn-info btn-view text-black" data-id="${row.biodata.no_document}">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-primary btn-download" data-id="${row.id}">
+                                    <i class="fa fa-file"></i> Download
+                                </button>
                                 <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
                                     <i class="fa fa-trash"></i> Hapus
                                 </button>
@@ -305,6 +313,12 @@
             $(document).on('click', '.btn-delete', function() {
                 const id = $(this).data('id');
                 deleteCertificate(id);
+            });
+
+            // View button click - redirect to check document
+            $(document).on('click', '.btn-view', function() {
+                const no_document = $(this).data('id');
+                window.open(`/index.php/welcome/check_document?t=${no_document}`, '_blank');
             });
         });
 
