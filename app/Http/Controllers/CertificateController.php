@@ -103,9 +103,21 @@ class CertificateController extends Controller
             $no_document = request()->input('no_document');
             $type_document = request()->input('type_document');
             
-            $data = Biodata::with(['certificate' => function($query) {
+            $query = Biodata::with(['certificate' => function($query) {
                 $query->orderBy('created_at', 'desc');
-            }])->where('no_document', $no_document)->first();
+            }, 'typeDocument'])->where('no_document', $no_document);
+            
+            if ($type_document) {
+                $query->whereHas('typeDocument', function($q) use ($type_document) {
+                    $q->where('name', $type_document);
+                });
+            }
+            
+            $data = $query->first();
+
+            if (!$data) {
+                return $this->error("Certificate not found", null, 404);
+            }
 
             $data->url_qr_code = env('APP_URL') . "/index.php/welcome/check_document?t=" . $data->no_document;
             $data->date_of_birth = $this->formatDate($data->date_of_birth);
@@ -121,7 +133,7 @@ class CertificateController extends Controller
 
             return $this->success($data, "Successfully get certificate", 200);
         } catch (\Exception $e) {
-            return $this->error("Failed fetch certificate", 500);
+            return $this->error("Failed fetch certificate", $e->getMessage(), 500);
         }
     }
     

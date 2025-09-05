@@ -256,7 +256,11 @@
                             }
                         </style>
                         <div class="row">
-                            <div class="col-md-6 col-md-offset-4 icv">
+                            {{-- start : not found data --}}
+                            <div id="not-found-message" style="display: none;"><p class="h3">Maaf, dokumen yang Anda cari tidak dapat Kami temukan.</p></div>
+                            {{-- end : not found data --}}
+
+                            <div id="certificate-content" class="col-md-6 col-md-offset-4 icv">
                                 <img src="https://sinkarkes.kemkes.go.id/assets/img/logo1.png" class="watermark"> <br>
 
                                 <section class="icv-header">
@@ -462,7 +466,9 @@
                            console.log('API Response:', res);
                            
                            if (res.success && res.data) {
-                               // Show result block
+                               // Hide not found message and show certificate content
+                               $("#not-found-message").hide();
+                               $("#certificate-content").show();
                                $("#result-block").show();
                                
                                // Fill patient data
@@ -498,23 +504,33 @@
                                    $("#certificate-table-body").html('<tr><td colspan="5" class="text-center">No certificate data available</td></tr>');
                                }
                            } else {
-                               console.error('Invalid API response structure:', res);
-                               $("#certificate-table-body").html('<tr><td colspan="5" class="text-center text-danger">Invalid response from server</td></tr>');
+                               // Show not found message and hide certificate content
+                               $("#certificate-content").hide();
+                               $("#not-found-message").show();
+                               $("#result-block").show();
                            }
                         },
                         error: function(xhr, status, error) {
                             console.error('Error fetching certificate:', error);
                             console.error('XHR:', xhr);
                             
-                            let errorMessage = 'Error loading certificate data';
                             if (xhr.status === 404) {
-                                errorMessage = 'Document not found';
-                            } else if (xhr.status === 500) {
-                                errorMessage = 'Server error';
+                                // Show not found message and hide certificate content for 404
+                                $("#certificate-content").hide();
+                                $("#not-found-message").show();
+                                $("#result-block").show();
+                            } else {
+                                // For other errors, show error in certificate table
+                                let errorMessage = 'Error loading certificate data';
+                                if (xhr.status === 500) {
+                                    errorMessage = 'Server error';
+                                }
+                                
+                                $("#not-found-message").hide();
+                                $("#certificate-content").show();
+                                $("#result-block").show();
+                                $("#certificate-table-body").html(`<tr><td colspan="5" class="text-center text-danger">${errorMessage}</td></tr>`);
                             }
-                            
-                            $("#result-block").show();
-                            $("#certificate-table-body").html(`<tr><td colspan="5" class="text-center text-danger">${errorMessage}</td></tr>`);
                         }
                     });
                 } else {

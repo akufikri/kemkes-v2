@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/welcome/check_document', function() {
     return view('general.welcome');
 });
+Route::get('/icv', function() {
+    return view('general.icv');
+});
 
 Route::get('/', function () {
     return redirect('/login');
