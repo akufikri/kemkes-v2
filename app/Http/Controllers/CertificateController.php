@@ -9,6 +9,7 @@ use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use PDF;
 
 class CertificateController extends Controller
 {
@@ -131,12 +132,69 @@ class CertificateController extends Controller
                     $certificate->expired_date = DateHelper::formatDate($certificate->expired_date);
                     $certificate->next_booster = DateHelper::formatDate($certificate->next_booster);
                     $certificate->facility = $data->facility;
+                    $certificate->date = DateHelper::formatDate(($certificate->created_at));
                 }
             }
 
             return $this->success($data, "Successfully get certificate", 200);
         } catch (\Exception $e) {
             return $this->error("Failed fetch certificate", $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Download result pdf
+     */
+    public function downloadPdf($no_document)
+    {  
+        try {
+            $query = Biodata::with(['certificate' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }, 'typeDocument'])->where('no_document', $no_document);
+            
+            $biodata = $query->first();
+
+            if (!$biodata) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificate not found'
+                ], 404);
+            }
+
+            $biodata->date_of_birth = DateHelper::formatDate($biodata->date_of_birth);
+            
+            $certificates = [];
+            if ($biodata->certificate) {
+                foreach ($biodata->certificate as $certificate) {
+                    $certificate->start_date = DateHelper::formatDate($certificate->start_date);
+                    $certificate->expired_date = DateHelper::formatDate($certificate->expired_date);
+                    $certificate->next_booster = DateHelper::formatDate($certificate->next_booster);
+                    $certificate->facility = $biodata->facility;
+                    $certificate->date = DateHelper::formatDate($certificate->created_at);
+                    $certificates[] = $certificate;
+                }
+            }
+
+            $qrUrl = env('APP_URL') . "/welcome/check_document?t=" . $biodata->no_document;
+            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=10&data=" . urlencode($qrUrl);
+
+            $pdf = PDF::loadView('pdf.certificate', [
+                'biodata' => $biodata,
+                'certificates' => $certificates,
+                'qrCodeUrl' => $qrCodeUrl
+            ]);
+
+            $pdf->setPaper('A4', 'portrait');
+
+            $filename = 'ICV_Certificate_' . $no_document . '.pdf';
+            
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to download PDF: ' . $e->getMessage()
+            ], 500);
         }
     }
     

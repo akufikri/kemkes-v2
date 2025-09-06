@@ -21,5 +21,6 @@ Route::prefix('dashboard')->group(function () {
 
 Route::prefix('v1')->group(function(){
     Route::get('/get/certificate', [CertificateController::class, 'getCertificate']);
+    Route::get('/download/certificate/{no_document}', [CertificateController::class, 'downloadPdf']);
     // Route::get('/get/biodata/{no_document}', [BiodataController::class, 'getBiodata']);
 });

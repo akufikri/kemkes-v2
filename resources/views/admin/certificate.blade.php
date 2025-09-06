@@ -232,8 +232,8 @@
                                 <button class="btn btn-sm btn-info btn-view text-black" data-id="${row.biodata.no_document}">
                                     <i class="fa fa-eye"></i> View
                                 </button>
-                                <button class="btn btn-sm btn-primary btn-download" data-id="${row.id}">
-                                    <i class="fa fa-file"></i> Download
+                                <button class="btn btn-sm btn-success text-white btn-download" data-id="${row.biodata.no_document}">
+                                    <i class="fa fa-file-pdf-o"></i> Download PDF
                                 </button>
                                 <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
                                     <i class="fa fa-trash"></i> Hapus
@@ -332,7 +332,21 @@
             // View button click - redirect to check document
             $(document).on('click', '.btn-view', function() {
                 const no_document = $(this).data('id');
-                window.open(`/index.php/welcome/check_document?t=${no_document}`, '_blank');
+                window.open(`/welcome/check_document?t=${no_document}`, '_blank');
+            });
+
+            // Download PDF button click
+            $(document).on('click', '.btn-download', function() {
+                const no_document = $(this).data('id');
+                if (no_document) {
+                    window.open(`/api/v1/download/certificate/${no_document}`, '_blank');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Nomor dokumen tidak ditemukan'
+                    });
+                }
             });
         });
 

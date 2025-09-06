@@ -322,8 +322,8 @@
                             </div>
                         </div>
                         <div class="form-group" style="overflow-x: scroll">
-                            <table class="table table-bordered table-striped">
-                                <thead>
+                            <table class="table table-bordered">
+                                <thead style="background: #f4f4f4">
                                     <tr>
                                         <th style="width: 100px;">Vaccine or Prophy</th>
                                         <th style="width: 100px;">Date</th>
@@ -340,20 +340,8 @@
                                         <th style="width: 100px;">Official stamp and signature</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>POLIO</td>
-                                        <td>23rd June 2025</td>
-                                        <td>dr. Nurendah Kristiana, MM</td>
-                                        <td>BIOFARMA 2220822</td>
-                                        <td>7th July 2026</td>
-                                        <td> Amelia Medical Center</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
+                                <tbody id="certificate_table_body" style="background: #f9f9f9">
+                                    <!-- Certificate data will be populated here -->
                                 </tbody>
                             </table>
                         </div>
@@ -522,6 +510,29 @@
                     // Extract vaccine names from certificate array and join with comma
                     const vaccineNames = res.data.certificate.map(cert => cert.vaccine_name).join(', ');
                     $("#name_of_vaccine").text(vaccineNames);
+                    
+                    // Populate certificate table
+                    const tableBody = $("#certificate_table_body");
+                    tableBody.empty();
+                    
+                    res.data.certificate.forEach(function(cert) {
+                        const row = `
+                            <tr>
+                                <td>${cert.vaccine_name}</td>
+                                <td>${cert.start_date}</td>
+                                <td>${cert.docter}</td>
+                                <td>${cert.batch_number}</td>
+                                <td>${cert.expired_date}</td>
+                                <td>${cert.facility}</td>
+                                <td>${cert.dease_target}</td>
+                                <td>${cert.date}</td>
+                                <td>${cert.vaccine_name} ${cert.batch_number}</td>
+                                <td>${cert.next_booster}</td>
+                                <td>-</td>
+                            </tr>
+                        `;
+                        tableBody.append(row);
+                    });
                 }
             });
         });

@@ -1,9 +1,9 @@
 @extends('app')
 @section('title')
-    Bio data
+    Biodata
 @endsection
 @section('title_header')
-    Bio data
+    Biodata
 @endsection
 @section('breadcrumbs')
     <li class="active">Bio data</li>
@@ -211,7 +211,7 @@
                         data: null,
                         render: function(data, type, row) {
                             return `
-                                <button class="btn btn-sm btn-info btn-view" data-id="${row.no_document}">
+                                <button class="btn btn-sm btn-info btn-view text-black" data-id="${row.no_document}">
                                     <i class="fa fa-eye"></i> View
                                 </button>
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
