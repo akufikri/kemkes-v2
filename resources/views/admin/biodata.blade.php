@@ -211,6 +211,9 @@
                         data: null,
                         render: function(data, type, row) {
                             return `
+                                <button class="btn btn-sm btn-info btn-view" data-id="${row.no_document}">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
                                     <i class="fa fa-edit"></i> Edit
                                 </button>
@@ -234,6 +237,12 @@
                 currentId = null;
                 $('#modalTitle').text('Tambah Biodata');
                 $('#biodataModal').modal('show');
+            });
+
+            // View button click
+            $(document).on('click', '.btn-view', function() {
+                const noDocument = $(this).data('id');
+                window.open(`/icv/${noDocument}`, '_blank');
             });
 
             // Edit button click

@@ -129,4 +129,17 @@ class BiodataController extends Controller
             return $this->error('Gagal menghapus data biodata', null, 500);
         }
     }
+    
+    // public function getBiodata($no_document)
+    // {
+    //     try {
+    //         $data = Biodata::where('no_document', $no_document)
+    //         ->with('certificate')
+    //         ->first();
+            
+    //         return $this->success($data, "Sukses mendapatkan data biodata", 200);
+    //     } catch (\Exception $e){
+    //         return $this->error("Gagal memuat data, tunggu beberapa saat", 500);
+    //     }
+    // }
 }

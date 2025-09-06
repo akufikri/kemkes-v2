@@ -34,6 +34,7 @@
                         <th>No Batch</th>
                         <th>Tanggal Kadaluarsa</th>
                         <th>Booster Berikutnya</th>
+                        <th>Target Penyakit</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -110,6 +111,13 @@
                                     <label for="next_booster">Booster Berikutnya</label>
                                     <input type="date" class="form-control" id="next_booster" name="next_booster">
                                     <span class="help-block text-red" id="next_booster_error"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dease_target">Target Penyakit</label>
+                                    <input type="text" class="form-control" id="dease_target" name="dease_target">
+                                    <span class="help-block text-red" id="dease_target_error"></span>
                                 </div>
                             </div>
                         </div>
@@ -206,6 +214,12 @@
                         data: 'next_booster',
                         render: function(data) {
                             return data ? new Date(data).toLocaleDateString('id-ID') : '-';
+                        }
+                    },
+                    { 
+                        data: 'dease_target',
+                        render: function(data) {
+                            return data || '-';
                         }
                     },
                     {
@@ -371,6 +385,7 @@
                         $('#batch_number').val(data.batch_number);
                         $('#expired_date').val(data.expired_date);
                         $('#next_booster').val(data.next_booster);
+                        $('#dease_target').val(data.dease_target);
                         
                         $('#certificateModal').modal('show');
                     }

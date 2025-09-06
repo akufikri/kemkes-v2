@@ -27,19 +27,6 @@
                                         </div>
                                     </form>
                                 </div>
-                                <!--									<nav class="header-nav-top">
-          <ul class="nav nav-pills">
-           <li class="hidden-xs">
-            <a href="https://sinkarkes.kemkes.go.id/portal/profil/visi_misi"><i class="fa fa-angle-right"></i> Tentang Kami</a>
-           </li>
-           <li class="hidden-xs">
-            <a href="https://sinkarkes.kemkes.go.id/contact/contact_us"><i class="fa fa-angle-right"></i> Kontak Kami</a>
-           </li>
-           <li>
-            <span class="ws-nowrap"><i class="fa fa-phone"></i> (021) 4266-920</span>
-           </li>
-          </ul>
-         </nav>-->
                             </div>
                             <div class="header-row">
                                 <div class="header-nav">

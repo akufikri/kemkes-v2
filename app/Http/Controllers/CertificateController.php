@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Biodata;
 use App\Models\Certificate;
 use App\Traits\ApiResponder;
+use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +41,7 @@ class CertificateController extends Controller
                 'batch_number' => 'nullable|string|max:255',
                 'expired_date' => 'required|date',
                 'next_booster' => 'nullable|date',
+                'dease_target' => 'nullable|string'
             ]);
 
             $certificate = Certificate::create($validatedData);
@@ -74,6 +76,7 @@ class CertificateController extends Controller
                 'batch_number' => 'nullable|string|max:255',
                 'expired_date' => 'sometimes|required|date',
                 'next_booster' => 'nullable|date',
+                'dease_target' => 'nullable|string'
             ]);
 
             $certificate->update($validatedData);
@@ -120,13 +123,13 @@ class CertificateController extends Controller
             }
 
             $data->url_qr_code = env('APP_URL') . "/index.php/welcome/check_document?t=" . $data->no_document;
-            $data->date_of_birth = $this->formatDate($data->date_of_birth);
+            $data->date_of_birth = DateHelper::formatDate($data->date_of_birth);
             
             if ($data->certificate) {
                 foreach ($data->certificate as $certificate) {
-                    $certificate->start_date = $this->formatDate($certificate->start_date);
-                    $certificate->expired_date = $this->formatDate($certificate->expired_date);
-                    $certificate->next_booster = $this->formatDate($certificate->next_booster);
+                    $certificate->start_date = DateHelper::formatDate($certificate->start_date);
+                    $certificate->expired_date = DateHelper::formatDate($certificate->expired_date);
+                    $certificate->next_booster = DateHelper::formatDate($certificate->next_booster);
                     $certificate->facility = $data->facility;
                 }
             }
@@ -137,42 +140,4 @@ class CertificateController extends Controller
         }
     }
     
-    /**
-     * Helper format date
-     */
-    public function formatDate($date)
-    {
-        if (!$date) return '';
-        
-        $dateObj = \Carbon\Carbon::parse($date);
-        $day = $dateObj->day;
-        $month = $dateObj->format('F');
-        $year = $dateObj->year;
-        
-        // Add ordinal suffix to day
-        $dayWithSuffix = $this->addOrdinalSuffix($day);
-        
-        return $dayWithSuffix . ' ' . $month . ' ' . $year;
-    }
-    
-    /**
-     * Add ordinal suffix to number
-     */
-    private function addOrdinalSuffix($number)
-    {
-        if ($number >= 11 && $number <= 13) {
-            return $number . 'th';
-        }
-        
-        switch ($number % 10) {
-            case 1:
-                return $number . 'st';
-            case 2:
-                return $number . 'nd';
-            case 3:
-                return $number . 'rd';
-            default:
-                return $number . 'th';
-        }
-    }
 }
