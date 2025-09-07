@@ -73,7 +73,7 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    if (xhr.status === 401 || xhr.status === 404) {
+                    if (xhr.status === 401 || xhr.status === 404 || xhr.status === 500) {
                         window.location.href = '/login';
                     }
                 }

@@ -22,23 +22,25 @@
             </div>
         </div>
         <div class="box-body">
-            <table id="biodataTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Document</th>
-                        <th>Nama Pasien</th>
-                        <th>Jenis Kelamin</th>
-                        <th>Tanggal Lahir</th>
-                        <th>Kebangsaan</th>
-                        <th>Penyakit</th>
-                        <th>Fasilitas</th>
-                        <th>Tipe Dokumen</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="table-responsive">
+                <table id="biodataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Document</th>
+                            <th>Nama Pasien</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Tanggal Lahir</th>
+                            <th>Kebangsaan</th>
+                            <th>Penyakit</th>
+                            <th>Fasilitas</th>
+                            <th>Tipe Dokumen</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
         <div class="box-footer"></div>
     </div>
@@ -64,7 +66,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="patient_name">Nama Pasien <span class="text-red">*</span></label>
-                                    <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+                                    <input type="text" class="form-control" id="patient_name" name="patient_name"
+                                        required>
                                     <span class="help-block text-red" id="patient_name_error"></span>
                                 </div>
                             </div>
@@ -84,7 +87,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="date_of_birth">Tanggal Lahir <span class="text-red">*</span></label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                                        required>
                                     <span class="help-block text-red" id="date_of_birth_error"></span>
                                 </div>
                             </div>
@@ -100,7 +104,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="nationality_doc">Dokumen Kebangsaan <span class="text-red">*</span></label>
-                                    <input type="text" class="form-control" id="nationality_doc" name="nationality_doc" required>
+                                    <input type="text" class="form-control" id="nationality_doc" name="nationality_doc"
+                                        required>
                                     <span class="help-block text-red" id="nationality_doc_error"></span>
                                 </div>
                             </div>
@@ -176,32 +181,41 @@
                         });
                     }
                 },
-                columns: [
-                    { 
+                columns: [{
                         data: null,
-                        render: function (data, type, row, meta) {
+                        render: function(data, type, row, meta) {
                             return meta.row + 1;
                         },
                         orderable: false
                     },
-                    { data: 'no_document' },
-                    { data: 'patient_name' },
-                    { 
+                    {
+                        data: 'no_document'
+                    },
+                    {
+                        data: 'patient_name'
+                    },
+                    {
                         data: 'sex',
                         render: function(data) {
                             return data === 'MALE' ? 'Laki-laki' : 'Perempuan';
                         }
                     },
-                    { 
+                    {
                         data: 'date_of_birth',
                         render: function(data) {
                             return new Date(data).toLocaleDateString('id-ID');
                         }
                     },
-                    { data: 'nationality' },
-                    { data: 'disease' },
-                    { data: 'facility' },
-                    { 
+                    {
+                        data: 'nationality'
+                    },
+                    {
+                        data: 'disease'
+                    },
+                    {
+                        data: 'facility'
+                    },
+                    {
                         data: 'type_document',
                         render: function(data) {
                             return data ? data.name : '-';
@@ -306,7 +320,7 @@
                         isEdit = true;
                         currentId = id;
                         $('#modalTitle').text('Edit Biodata');
-                        
+
                         // Fill form
                         $('#no_document').val(data.no_document);
                         $('#patient_name').val(data.patient_name);
@@ -317,7 +331,7 @@
                         $('#disease').val(data.disease);
                         $('#facility').val(data.facility);
                         $('#id_type_document').val(data.id_type_document);
-                        
+
                         $('#biodataModal').modal('show');
                     }
                 })
@@ -335,9 +349,9 @@
             const formData = $('#biodataForm').serialize();
             const url = isEdit ? `/api/dashboard/biodata/${currentId}` : "/api/dashboard/biodata";
             const method = isEdit ? 'PUT' : 'POST';
-            
+
             $('#btnSubmit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
-            
+
             $.ajax({
                 url: url,
                 type: method,

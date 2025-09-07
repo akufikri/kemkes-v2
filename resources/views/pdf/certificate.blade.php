@@ -1,26 +1,61 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+    <!-- Basic -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>International Certificate of Vaccination</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Sistem Informasi Kesehatan Pelabuhan</title>
+    <meta name="description" content="SINKARKES">
+    <meta name="author" content="Ardi Soebrata">
+    <meta name="keywords" content="Kesehatan Pelabuhan, Kementerian Kesehatan, Republik Indonesia">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="https://sinkarkes.kemkes.go.id/assets/img/favicons/apple-touch-icon.png?v=BGGrN6p0zJ">
+    <link rel="icon" type="image/png"
+        href="https://sinkarkes.kemkes.go.id/assets/img/favicons/favicon-32x32.png?v=BGGrN6p0zJ" sizes="32x32">
+    <link rel="icon" type="image/png"
+        href="https://sinkarkes.kemkes.go.id/assets/img/favicons/favicon-16x16.png?v=BGGrN6p0zJ" sizes="16x16">
+    <link rel="manifest" href="https://sinkarkes.kemkes.go.id/assets/img/favicons/manifest.json?v=BGGrN6p0zJ">
+    <link rel="mask-icon" href="https://sinkarkes.kemkes.go.id/assets/img/favicons/safari-pinned-tab.svg?v=BGGrN6p0zJ"
+        color="#40ada6">
+    <link rel="shortcut icon" href="https://sinkarkes.kemkes.go.id/assets/img/favicons/favicon.ico?v=BGGrN6p0zJ">
+    <meta name="apple-mobile-web-app-title" content="Simkespel">
+    <meta name="application-name" content="Simkespel">
+    <meta name="msapplication-config"
+        content="https://sinkarkes.kemkes.go.id/assets/img/favicons/browserconfig.xml?v=BGGrN6p0zJ">
+    <meta name="theme-color" content="#40ada6">
+
+    <!-- Web Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800%7CShadows+Into+Light"
+        rel="stylesheet" type="text/css">
     <style>
+        * {
+            font-family: 'Open Sans', Arial, sans-serif !important;
+        }
+
+        @page {
+            margin: 0;
+            size: A4 potrait;
+        }
+
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
+            background: url('{{ public_path('assets/images/background.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* margin:0px */
         }
-        
+
         .icv {
-            margin: 0 auto;
+            /* margin: 0 auto; */
             padding: 20px;
-            background-color: #f5e19f;
             position: relative;
-            background: rgb(141, 178, 227);
-            background: linear-gradient(36deg, rgba(141, 178, 227, 1) 1%, rgba(245, 225, 159, 1) 15%);
-            width: 100%;
-            min-height: 100vh;
         }
 
         .icv .watermark {
@@ -35,7 +70,6 @@
 
         .icv-header {
             text-align: center;
-            margin-bottom: 20px;
         }
 
         .icv-header img {
@@ -79,17 +113,10 @@
             position: relative;
         }
 
-        .main-data-table {
-            width: 100%;
-        }
-
         .main-data img {
+            top: 0;
+            right: 0;
             width: 133px;
-        }
-
-        .qr-cell {
-            width: 146px;
-            text-align: center;
         }
 
         .icv .data-detail {
@@ -111,7 +138,6 @@
         .icv-table {
             width: 100%;
             font-size: 10px;
-            border-collapse: collapse;
         }
 
         .icv-table th,
@@ -119,18 +145,23 @@
             padding: 5px;
             vertical-align: top;
             line-height: 1.4;
-            border: 1px solid #ccc;
+            text-align: left;
         }
 
         .icv-table th {
             font-weight: normal;
             background-color: #e8d79c;
+            text-align: left;
         }
 
         .icv-footer {
             margin-top: 20px;
             text-align: center;
             font-size: 11px;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
         }
 
         .icv-footer p {
@@ -138,151 +169,154 @@
             margin: 0px;
             line-height: 1.4;
         }
-
-        .text-center {
-            text-align: center;
+        .text-secondary{
+            color: #777777
         }
     </style>
 </head>
+
 <body>
-    <div class="icv">
-        <img src="https://sinkarkes.kemkes.go.id/assets/img/logo1.png" class="watermark">
+    <div id="result-block">
+        <div class="row">
+            <div id="certificate-content" class="col-md-6 col-md-offset-4 icv">
+                <img src="https://sinkarkes.kemkes.go.id/assets/img/logo1.png" class="watermark"> <br>
 
-        <section class="icv-header">
-            <div>
-                <img src="https://sinkarkes.kemkes.go.id/assets/img/pancasila.png" alt="Logo Garuda" height="40">
-            </div>
-            <div>
-                <img src="https://sinkarkes.kemkes.go.id/assets/img/who.png" alt="Logo WHO" height="30">
-                <img src="https://sinkarkes.kemkes.go.id/assets/img/kemkes-landscape.png" alt="Logo Kemenkes" height="30">
-                <img src="https://sinkarkes.kemkes.go.id/assets/img/satusehat.png" alt="Logo Satusehat" height="30">
-            </div>
-            <h3>International Certificate of Vaccination (Prophylaxis)</h3>
-            <p>Certificat Internatiional de Vaccination ou de Prophylaxie</p>
-        </section>
-
-        <section class="icv-body">
-            <div class="main-data">
-                <table class="main-data-table">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <p class="text-bold">{{ strtoupper($biodata->patient_name) }}</p>
-                                <p>Passport {{ $biodata->nationality_doc }}</p>
-                                <p>{{ $biodata->date_of_birth }}</p>
-                            </td>
-                            <td class="qr-cell">
-                                <img src="{{ $qrCodeUrl }}" alt="QR Code">
-                                <br>
-                                <span>{{ $biodata->no_document }}</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="data-detail">
-                <p class="title">In accordance with the International Health Regulations</p>
-                <p>compormement au Reglement sanitaire international</p>
-                
-                <table class="icv-table" style="margin-bottom: 20px">
-                    <thead>
-                        <tr>
-                            <th>
-                                <strong>Vaccine or Prophylaxis</strong><br>
-                                Vaccin ou agent prophylactique
-                            </th>
-                            <th>
-                                <strong>Manufacturer and Batch no. of vaccine or prophylaxis</strong><br>
-                                Fabircant du vaccin ou de l'agent prophylactique prophylactique et numero du lot
-                            </th>
-                            <th>
-                                <strong>Date</strong><br>
-                                Date
-                            </th>
-                            <th>
-                                <strong>Valid Until</strong><br>
-                                Valiable jusqu'au
-                            </th>
-                            <th>
-                                <strong>Administering Location &amp; Supervising Clinician</strong><br>
-                                Lieu d'administration et Clinicien superviseur
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if($certificates && count($certificates) > 0)
-                            @foreach($certificates as $certificate)
+                <section class="icv-header">
+                    <div>
+                        <img src="https://sinkarkes.kemkes.go.id/assets/img/pancasila.png" alt="Logo Garuda"
+                            height="40"> <br>
+                    </div>
+                    <div>
+                        <img src="https://sinkarkes.kemkes.go.id/assets/img/who.png" alt="Logo WHO" height="30">
+                        <img src="https://sinkarkes.kemkes.go.id/assets/img/kemkes-landscape.png" alt="Logo Kemenkes"
+                            height="30">
+                        <img src="https://sinkarkes.kemkes.go.id/assets/img/satusehat.png" alt="Logo Satusehat"
+                            height="30">
+                    </div>
+                    <h3>International Certificate of Vaccination (Prophylaxis)</h3>
+                    <p style="margin-top: 0px" class="text-secondary">Certificat Internatiional de Vaccination ou de Prophylaxie</p>
+                </section>
+                <section class="icv-body">
+                    <div class="main-data">
+                        <table style="width: 100%">
+                            <tbody>
                                 <tr>
-                                    <td class="text-bold">{{ strtoupper($certificate->vaccine_name) }}</td>
-                                    <td>{{ $certificate->batch_number }}</td>
-                                    <td>{{ $certificate->start_date }}</td>
-                                    <td>{{ $certificate->expired_date }}</td>
-                                    <td>{{ $certificate->facility }} {{ $certificate->docter }}</td>
+                                    <td>
+                                        <p class="text-bold text-secondary" id="patient_name">{{ Str::limit($biodata->patient_name, strlen($biodata->patient_name) - 3, '***') }}</p>
+                                        <p class="text-secondary">Passport <span id="passport">{{ Str::limit($biodata->nationality_doc, strlen($biodata->nationality_doc) - 3, '***') }}</span></p>
+                                        <p class="text-secondary" id="birth">{{ $biodata->date_of_birth }}</p>
+                                    </td>
+                                    <td style="width:146px; text-align: center">
+                                        <img src="{{ $qrCodeUrl }}"
+                                            alt="" id="qr_certificate" height="133" width="133">
+                                        <span id="no_document" class="text-secondary">{{ $biodata->no_document }}</span>
+                                    </td>
                                 </tr>
-                            @endforeach
-                        @else
-                            <tr>
-                                <td colspan="5" class="text-center">No certificate data available</td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-
-                <!-- Other Details -->
-                <table class="icv-table">
-                    <thead>
-                        <tr>
-                            <th><strong>Disease targeted</strong></th>
-                            <th><strong>Date</strong></th>
-                            <th><strong>Manufacture and Batch No. of vaccine or prophylaxis</strong></th>
-                            <th><strong>Next Booster</strong></th>
-                            <th><strong>Official stamp and signature</strong></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if($certificates && count($certificates) > 0)
-                            @foreach($certificates as $certificate)
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="data-detail">
+                        <p class="title text-secondary" style="margin-bottom: 5px; margin-top:5px; font-size:14px">In accordance with the International Health Regulations</p>
+                        <p class="text-secondary" style="margin-bottom: 5px; margin-top:5px">compormement au Reglement sanitaire international</p>
+                        <table class="icv-table" style="margin-bottom: 20px">
+                            <thead>
+                                <tr class="text-secondary">
+                                    <th>
+                                        <strong>Vaccine or Prophylaxis</strong><br>
+                                        Vaccin ou agent prophylactique
+                                    </th>
+                                    <th>
+                                        <strong>Manufacturer and Batch no. of vaccine or
+                                            prophylaxis</strong><br>
+                                        Fabircant du vaccin ou de l'agent prophylactique prophylactique
+                                        et numero du lot
+                                    </th>
+                                    <th>
+                                        <strong>Date</strong><br>
+                                        Date
+                                    </th>
+                                    <th>
+                                        <strong>Valid Until</strong><br>
+                                        Valiable jusqu'au
+                                    </th>
+                                    <th>
+                                        <strong>Administering Location &amp; Supervising
+                                            Clinician</strong><br>
+                                        Lieu d'administration et Clinicien superviseur
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="certificate-table-body">
+                                @foreach ($certificates as $item)
+                                    <tr class="text-secondary">
+                                        <td>
+                                            <strong>{{ $item->vaccine_name }}</strong>
+                                        </td>
+                                        <td>{{ $item->batch_number }}</td>
+                                        <td>{{ $item->start_date }}</td>
+                                        <td>{{ $item->expired_date }}</td>
+                                        <td>{{ $item->facility }} {{ $item->docter }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <!-- Other Details -->
+                        <table class="icv-table">
+                            <thead class="text-secondary">
                                 <tr>
-                                    <td class="text-bold">{{ $certificate->dease_target ?? '' }}</td>
-                                    <td>{{ $certificate->start_date }}</td>
-                                    <td>{{ $certificate->batch_number }}</td>
-                                    <td>{{ $certificate->next_booster ?? '' }}</td>
+                                    <th>
+                                        <strong>Disease targeted</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Date</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Manufacture and Batch No. of vaccine or
+                                            prophylaxis</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Next Booster</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Official stamp and signature</strong>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-bold"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
-                            @endforeach
-                        @else
-                            <tr>
-                                <td class="text-bold"></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="text-bold"></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
+                                <tr>
+                                    <td class="text-bold"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="icv-footer">
+                    <div class="pagination text-secondary">
+                        <strong>Penafisan (Disclaimer):</strong>
+                        <p>Nomor kode ICV elektronik (eICV) berbeda dengan nomor seri ICV fisik</p>
+                        <br>
+                    </div>
+                    <div class="issued text-secondary">
+                        <p class="text-bold">This certificate was issued by Ministry of Health of
+                            Indonesia</p>
+                        <p>Ce certificat a été délivré par le ministère Indonésien de la Santé</p>
+                    </div>
+                </section>
             </div>
-        </section>
 
-        <section class="icv-footer">
-            <div class="pagination">
-                <strong>Penafisan (Disclaimer):</strong>
-                <p>Nomor kode ICV elektronik (eICV) berbeda dengan nomor seri ICV fisik</p>
-                <br>
-            </div>
-            <div class="issued">
-                <p class="text-bold">This certificate was issued by Ministry of Health of Indonesia</p>
-                <p>Ce certificat a été délivré par le ministère Indonésien de la Santé</p>
-            </div>
-        </section>
+        </div>
     </div>
 </body>
+
 </html>
