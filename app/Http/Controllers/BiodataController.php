@@ -19,7 +19,9 @@ class BiodataController extends Controller
     public function index()
     {
         try {
-            $biodatas = Biodata::with('typeDocument')->get();
+            $biodatas = Biodata::with('typeDocument')
+            ->latest()
+            ->get();
             return $this->success($biodatas, 'Data biodata berhasil diambil', 200);
         } catch (\Exception $e) {
             return $this->error('Gagal mengambil data biodata', null, 500);

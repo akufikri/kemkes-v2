@@ -111,6 +111,14 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        'supabase' => [
+            'driver' => 'pgsql',
+            'url' => env('SUPABASE_URL'),   // <--- pakai URL di .env
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'sslmode' => 'require', // supabase butuh ssl
+        ],
 
     ],
 
@@ -147,7 +155,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

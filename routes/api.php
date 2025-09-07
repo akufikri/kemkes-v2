@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BiodataController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\PlaygroundController;
 use App\Http\Controllers\TypeDocumentController;
 
 Route::middleware('web')->group(function () {
@@ -22,5 +23,7 @@ Route::prefix('dashboard')->group(function () {
 Route::prefix('v1')->group(function(){
     Route::get('/get/certificate', [CertificateController::class, 'getCertificate']);
     Route::get('/download/certificate/{no_document}', [CertificateController::class, 'downloadPdf']);
-    // Route::get('/get/biodata/{no_document}', [BiodataController::class, 'getBiodata']);
+    Route::prefix('playground')->group(function()   {
+        Route::get('/', [PlaygroundController::class, 'index']);
+    });
 });

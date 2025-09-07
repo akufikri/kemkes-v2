@@ -32,8 +32,8 @@
             </section>
         </div>
         <footer class="main-footer">
-            <div class="pull-right hidden-xs"><b>Version</b> 2.4.18</div>
-            <strong>Copyright &copy; 2025<a href="https://adminlte.io">Sinkarkes</a>.</strong> All rights reserved.
+            {{-- <div class="pull-right hidden-xs"><b>Version</b> 2.4.18</div> --}}
+            <strong>Copyright &copy; 2025<a>Sinkarkes</a>.</strong> All rights reserved.
         </footer>
         <div class="control-sidebar-bg"></div>
     </div>

@@ -24,7 +24,9 @@ class CertificateController extends Controller
      */
     public function index(): JsonResponse
     {
-        $certificates = Certificate::with('biodata')->get();
+        $certificates = Certificate::with('biodata')
+        ->latest()
+        ->get();
         return $this->success($certificates, 'Certificates retrieved successfully', 200);
     }
 
@@ -107,20 +109,18 @@ class CertificateController extends Controller
             $no_document = request()->input('no_document');
             $type_document = request()->input('type_document');
             
-            $query = Biodata::with(['certificate' => function($query) {
+            // First check if document exists with no_document (primary filter)
+            $data = Biodata::with(['certificate' => function($query) {
                 $query->orderBy('created_at', 'desc');
-            }, 'typeDocument'])->where('no_document', $no_document);
-            
-            if ($type_document) {
-                $query->whereHas('typeDocument', function($q) use ($type_document) {
-                    $q->where('name', $type_document);
-                });
-            }
-            
-            $data = $query->first();
+            }, 'typeDocument'])->where('no_document', $no_document)->first();
 
             if (!$data) {
                 return $this->error("Certificate not found", null, 404);
+            }
+
+            // If type_document is specified, check if it matches
+            if ($type_document && $data->typeDocument && $data->typeDocument->name !== $type_document) {
+                return $this->error("Certificate not found for this document type", null, 404);
             }
 
             $data->url_qr_code = env('APP_URL') . "/index.php/welcome/check_document?t=" . $data->no_document;
