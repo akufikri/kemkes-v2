@@ -20,10 +20,11 @@ Route::prefix('dashboard')->group(function () {
     Route::apiResource('/certificate', CertificateController::class);
 });
 
-Route::prefix('v1')->group(function(){
+Route::prefix('v1')->group(function () {
     Route::get('/get/certificate', [CertificateController::class, 'getCertificate']);
     Route::get('/download/certificate/{no_document}', [CertificateController::class, 'downloadPdf']);
-    Route::prefix('playground')->group(function()   {
+    Route::prefix('playground')->group(function () {
         Route::get('/', [PlaygroundController::class, 'index']);
     });
+    Route::get('/checkNoDocument/{params}', [CertificateController::class, 'checkNoDocument']);
 });

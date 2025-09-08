@@ -436,13 +436,43 @@
     <script>
         $(document).ready(function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const noDocument = urlParams.get('t');
+            let params = urlParams.get('t');
+            
+            if(!params) {
+                params = urlParams.get('no_document');
+            }
+            
+            let noDocument = params;
             
             // Set default value from URL parameter
             if (noDocument) {
                 $("#no_dokumen").val(noDocument);
             }
             
+            function checkDocument() { 
+                $.ajax({
+                    type: "GET",
+                    url: "/api/v1/checkNoDocument/" + noDocument,
+                    dataType: "JSON",
+                    success: function (response) {
+                        console.log(response);
+                        
+                        // If response data is 0, switch to no_document parameter
+                        if (response.data === 0) {
+                            const newParams = urlParams.get('no_document');
+                            if (newParams && newParams !== noDocument) {
+                                noDocument = newParams;
+                                $("#no_dokumen").val(noDocument);
+                                // Retry check with new parameter
+                                checkDocument();
+                            }
+                        }
+                    }
+                });
+             }
+
+             checkDocument()
+
             const sensorText = (text) => {
                 if (!text || text.length <= 3) return text;
                 return text.substring(0, text.length - 3) + '***';

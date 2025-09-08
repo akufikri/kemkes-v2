@@ -225,14 +225,16 @@
                     {
                         data: null,
                         render: function(data, type, row) {
+                            let noDoc = row?.biodata?.no_document ?? ""; // kalau null jadinya string kosong
+
                             return `
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
                                     <i class="fa fa-edit"></i> Edit
                                 </button>
-                                <button class="btn btn-sm btn-info btn-view text-black" data-id="${row.biodata.no_document}">
+                                <button class="btn btn-sm btn-info btn-view text-black" data-id="${noDoc}">
                                     <i class="fa fa-eye"></i> View
                                 </button>
-                                <button class="btn btn-sm btn-success text-white btn-download" data-id="${row.biodata.no_document}">
+                                <button class="btn btn-sm btn-success text-white btn-download" data-id="${noDoc}">
                                     <i class="fa fa-file-pdf-o"></i> Download PDF
                                 </button>
                                 <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
@@ -242,6 +244,7 @@
                         },
                         orderable: false
                     }
+
                 ]
             });
 

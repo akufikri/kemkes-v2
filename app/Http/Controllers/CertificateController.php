@@ -15,7 +15,8 @@ class CertificateController extends Controller
 {
     use ApiResponder;
 
-    public function getView() {
+    public function getView()
+    {
         return view('admin.certificate');
     }
 
@@ -25,8 +26,8 @@ class CertificateController extends Controller
     public function index(): JsonResponse
     {
         $certificates = Certificate::with('biodata')
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
         return $this->success($certificates, 'Certificates retrieved successfully', 200);
     }
 
@@ -97,7 +98,7 @@ class CertificateController extends Controller
     public function destroy(Certificate $certificate): JsonResponse
     {
         $certificate->delete();
-        
+
         return $this->success(null, 'Certificate deleted successfully', 200);
     }
     /**
@@ -108,25 +109,37 @@ class CertificateController extends Controller
         try {
             $no_document = request()->input('no_document');
             $type_document = request()->input('type_document');
-            
-            // First check if document exists with no_document (primary filter)
-            $data = Biodata::with(['certificate' => function($query) {
-                $query->orderBy('created_at', 'desc');
-            }, 'typeDocument'])->where('no_document', $no_document)->first();
+
+            // Load data tanpa ordering khusus di relationship
+            $data = Biodata::with(['certificate', 'typeDocument'])
+                ->where('no_document', $no_document)
+                ->first();
 
             if (!$data) {
                 return $this->error("Certificate not found", null, 404);
             }
 
-            // If type_document is specified, check if it matches
             if ($type_document && $data->typeDocument && $data->typeDocument->name !== $type_document) {
                 return $this->error("Certificate not found for this document type", null, 404);
             }
 
             $data->url_qr_code = env('APP_URL') . "/index.php/welcome/check_document?t=" . $data->no_document;
             $data->date_of_birth = DateHelper::formatDate($data->date_of_birth);
-            
+
             if ($data->certificate) {
+                // Custom sorting: MENINGITIS first, then by created_at desc
+                $data->certificate = $data->certificate->sort(function ($a, $b) {
+                    $aHasMeningitis = stripos($a->vaccine_name, 'MENINGITIS') !== false;
+                    $bHasMeningitis = stripos($b->vaccine_name, 'MENINGITIS') !== false;
+
+                    // If one has MENINGITIS and other doesn't
+                    if ($aHasMeningitis && !$bHasMeningitis) return -1;
+                    if (!$aHasMeningitis && $bHasMeningitis) return 1;
+
+                    // If both have or both don't have MENINGITIS, sort by created_at desc
+                    return $b->created_at <=> $a->created_at;
+                })->values(); // Reset array keys
+
                 foreach ($data->certificate as $certificate) {
                     $certificate->start_date = DateHelper::formatDate($certificate->start_date);
                     $certificate->expired_date = DateHelper::formatDate($certificate->expired_date);
@@ -146,12 +159,12 @@ class CertificateController extends Controller
      * Download result pdf
      */
     public function downloadPdf($no_document)
-    {  
+    {
         try {
-            $query = Biodata::with(['certificate' => function($query) {
+            $query = Biodata::with(['certificate' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             }, 'typeDocument'])->where('no_document', $no_document);
-            
+
             $biodata = $query->first();
 
             if (!$biodata) {
@@ -162,7 +175,7 @@ class CertificateController extends Controller
             }
 
             $biodata->date_of_birth = DateHelper::formatDate($biodata->date_of_birth);
-            
+
             $certificates = [];
             if ($biodata->certificate) {
                 foreach ($biodata->certificate as $certificate) {
@@ -187,9 +200,8 @@ class CertificateController extends Controller
             $pdf->setPaper('A4', 'portrait');
 
             $filename = 'ICV_Certificate_' . $no_document . '.pdf';
-            
+
             return $pdf->download($filename);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -197,5 +209,18 @@ class CertificateController extends Controller
             ], 500);
         }
     }
-    
+
+    public function checkNoDocument($params)
+    {
+        $data = Biodata::where('no_document', $params)->first();
+        if ($data) {
+            return response()->json([
+                'data' => 1
+            ], 200);
+        } else {
+            return response()->json([
+                'data' => 0
+            ]);
+        }
+    }
 }
