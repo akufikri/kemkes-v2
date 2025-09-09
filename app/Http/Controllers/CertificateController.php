@@ -189,7 +189,7 @@ class CertificateController extends Controller
             }
 
             $qrUrl = env('APP_URL') . "/welcome/check_document?t=" . $biodata->no_document;
-            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=10&data=" . urlencode($qrUrl);
+            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=9&data=" . urlencode($qrUrl);
 
             $pdf = PDF::loadView('pdf.certificate', [
                 'biodata' => $biodata,
@@ -199,7 +199,7 @@ class CertificateController extends Controller
 
             $pdf->setPaper('A4', 'portrait');
 
-            $filename = 'ICV_Certificate_' . $no_document . '.pdf';
+            $filename =  ucwords($biodata->patient_name) . '.pdf';
 
             return $pdf->download($filename);
         } catch (\Exception $e) {

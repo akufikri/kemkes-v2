@@ -34,17 +34,19 @@
         rel="stylesheet" type="text/css">
     <style>
         * {
-            font-family: 'Open Sans', Arial, sans-serif !important;
+            font-family: 'Open Sans', Arial, sans-serif;
         }
 
         @page {
             margin: 0;
-            size: A4 potrait;
+            size: 595px 842px;
         }
 
         body {
             margin: 0;
             padding: 0;
+            width: 595px;
+            height: 842px;
             background: url('{{ public_path('assets/images/background.jpg') }}');
             background-size: cover;
             background-position: center;
@@ -63,9 +65,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height: 230px;
-            opacity: 0.2;
-            filter: grayscale(100%) brightness(80%) contrast(120%);
+            height: 190px;
+            opacity: 0.1;
+            -webkit-filter: grayscale(100%) brightness(80%) contrast(120%);
+            /* DomPDF fallback - just use very low opacity */
         }
 
         .icv-header {
@@ -81,7 +84,7 @@
         }
 
         .icv-header h3 {
-            margin-top: 19px;
+            margin-top: 0px;
             margin-bottom: 0px;
             font-size: 20px;
             font-weight: bold;
@@ -89,12 +92,12 @@
         }
 
         .icv-header p {
-            font-size: 16px;
+            font-size: 0px;
             line-height: 1.3;
         }
 
         .icv-body {
-            margin-top: 20px;
+            margin-top: 0px;
         }
 
         .icv-body p {
@@ -169,7 +172,8 @@
             margin: 0px;
             line-height: 1.4;
         }
-        .text-secondary{
+
+        .text-secondary {
             color: #777777
         }
     </style>
@@ -178,9 +182,8 @@
 <body>
     <div id="result-block">
         <div class="row">
-            <div id="certificate-content" class="col-md-6 col-md-offset-4 icv">
+            <div id="certificate-content" class="col-md-6 col-md-offset-4 icv" style="padding-top: 0px">
                 <img src="https://sinkarkes.kemkes.go.id/assets/img/logo1.png" class="watermark"> <br>
-
                 <section class="icv-header">
                     <div>
                         <img src="https://sinkarkes.kemkes.go.id/assets/img/pancasila.png" alt="Logo Garuda"
@@ -193,31 +196,40 @@
                         <img src="https://sinkarkes.kemkes.go.id/assets/img/satusehat.png" alt="Logo Satusehat"
                             height="30">
                     </div>
-                    <h3>International Certificate of Vaccination (Prophylaxis)</h3>
-                    <p style="margin-top: 0px" class="text-secondary">Certificat Internatiional de Vaccination ou de Prophylaxie</p>
+                    <h3 class="text-secondary" style="font-size: 18px">International Certificate of Vaccination
+                        (Prophylaxis)</h3>
+                    <p style="margin-top: 0px; font-size:14px" class="text-secondary">Certificat Internatiional de
+                        Vaccination ou de
+                        Prophylaxie</p>
                 </section>
                 <section class="icv-body">
                     <div class="main-data">
                         <table style="width: 100%">
                             <tbody>
                                 <tr>
-                                    <td>
-                                        <p class="text-bold text-secondary" id="patient_name">{{ Str::limit($biodata->patient_name, strlen($biodata->patient_name) - 3, '***') }}</p>
-                                        <p class="text-secondary">Passport <span id="passport">{{ Str::limit($biodata->nationality_doc, strlen($biodata->nationality_doc) - 3, '***') }}</span></p>
-                                        <p class="text-secondary" id="birth">{{ $biodata->date_of_birth }}</p>
+                                    <td style="padding-bottom: 56.5px">
+                                        <p class="text-secondary" style="font-size: 13px">
+                                            <strong>{{ $biodata->patient_name }}</strong><br>
+                                            Passport {{ $biodata->nationality_doc }} <br>
+                                            {{ $biodata->date_of_birth }}
+                                        </p>
                                     </td>
-                                    <td style="width:146px; text-align: center">
-                                        <img src="{{ $qrCodeUrl }}"
-                                            alt="" id="qr_certificate" height="133" width="133">
-                                        <span id="no_document" class="text-secondary">{{ $biodata->no_document }}</span>
+                                    <td style="width:146px; text-align:right">
+                                        <img src="{{ $qrCodeUrl }}" alt="" id="qr_certificate"
+                                            style="width: 100px; height:100px">
+                                        <br>
+                                        <span id="no_document" class="text-secondary"
+                                            style="font-size: 12px; margin-top:0px; margin-right:6px">{{ $biodata->no_document }}</span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="data-detail">
-                        <p class="title text-secondary" style="margin-bottom: 5px; margin-top:5px; font-size:14px">In accordance with the International Health Regulations</p>
-                        <p class="text-secondary" style="margin-bottom: 5px; margin-top:5px">compormement au Reglement sanitaire international</p>
+                        <p class="title text-secondary" style="margin-bottom: 5px; margin-top:5px; font-size:12px">In
+                            accordance with the International Health Regulations</p>
+                        <p class="text-secondary" style="margin-bottom: 3px; margin-top:5px">compormement au Reglement
+                            sanitaire international</p>
                         <table class="icv-table" style="margin-bottom: 20px">
                             <thead>
                                 <tr class="text-secondary">
