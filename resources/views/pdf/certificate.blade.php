@@ -66,13 +66,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
             height: 190px;
-            opacity: 0.1;
-            -webkit-filter: grayscale(100%) brightness(80%) contrast(120%);
-            /* DomPDF fallback - just use very low opacity */
+            opacity: 0.3;
+            z-index: 0;
+            filter: grayscale(100%);
+            -webkit-filter: grayscale(100%);
+            /* DomPDF fallback - just use moderate opacity */
         }
 
         .icv-header {
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
         .icv-header img {
@@ -98,6 +102,8 @@
 
         .icv-body {
             margin-top: 0px;
+            position: relative;
+            z-index: 1;
         }
 
         .icv-body p {
@@ -153,8 +159,8 @@
 
         .icv-table th {
             font-weight: normal;
-            background-color: #e8d79c;
-            text-align: left;
+            background-color: rgba(232, 215, 156, 0.8);
+            text-align: center;
         }
 
         .icv-footer {
@@ -183,7 +189,7 @@
     <div id="result-block">
         <div class="row">
             <div id="certificate-content" class="col-md-6 col-md-offset-4 icv" style="padding-top: 0px">
-                <img src="https://sinkarkes.kemkes.go.id/assets/img/logo1.png" class="watermark"> <br>
+                <img src="{{ public_path('assets/images/wm.png') }}" class="watermark"> <br>
                 <section class="icv-header">
                     <div>
                         <img src="https://sinkarkes.kemkes.go.id/assets/img/pancasila.png" alt="Logo Garuda"
@@ -207,7 +213,7 @@
                         <table style="width: 100%">
                             <tbody>
                                 <tr>
-                                    <td style="padding-bottom: 56.5px">
+                                    <td style="padding-bottom: 56.5px; vertical-align: middle; padding-top: 25px">
                                         <p class="text-secondary" style="font-size: 13px">
                                             <strong>{{ $biodata->patient_name }}</strong><br>
                                             Passport {{ $biodata->nationality_doc }} <br>
@@ -267,7 +273,7 @@
                                         <td>{{ $item->batch_number }}</td>
                                         <td>{{ $item->start_date }}</td>
                                         <td>{{ $item->expired_date }}</td>
-                                        <td>{{ $item->facility }} {{ $item->docter }}</td>
+                                        <td>{{ $item->facility }} <br> {{ $item->docter }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

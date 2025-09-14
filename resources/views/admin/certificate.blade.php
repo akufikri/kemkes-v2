@@ -22,25 +22,25 @@
             </div>
         </div>
         <div class="box-body">
-           <div class="table-responsive">
-             <table id="certificateTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Pasien</th>
-                        <th>Nama Vaksin</th>
-                        <th>Tanggal Mulai</th>
-                        <th>Dokter</th>
-                        <th>No Batch</th>
-                        <th>Tanggal Kadaluarsa</th>
-                        <th>Booster Berikutnya</th>
-                        <th>Target Penyakit</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-           </div>
+            <div class="table-responsive">
+                <table id="certificateTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Pasien</th>
+                            <th>Nama Vaksin</th>
+                            <th>Tanggal Mulai</th>
+                            <th>Dokter</th>
+                            <th>No Batch</th>
+                            <th>Tanggal Kadaluarsa</th>
+                            <th>Booster Berikutnya</th>
+                            <th>Target Penyakit</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
         <div class="box-footer"></div>
     </div>
@@ -100,7 +100,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="expired_date">Tanggal Kadaluarsa <span class="text-red">*</span></label>
-                                    <input type="date" class="form-control" id="expired_date" name="expired_date" required>
+                                    <input type="date" class="form-control" id="expired_date" name="expired_date"
+                                        required>
                                     <span class="help-block text-red" id="expired_date_error"></span>
                                 </div>
                             </div>
@@ -166,57 +167,56 @@
                         });
                     }
                 },
-                columns: [
-                    { 
+                columns: [{
                         data: null,
-                        render: function (data, type, row, meta) {
+                        render: function(data, type, row, meta) {
                             return meta.row + 1;
                         },
                         orderable: false
                     },
-                    { 
+                    {
                         data: 'biodata',
                         render: function(data) {
                             return data ? data.patient_name : '-';
                         }
                     },
-                    { 
+                    {
                         data: 'vaccine_name',
                         render: function(data) {
                             return data || '-';
                         }
                     },
-                    { 
+                    {
                         data: 'start_date',
                         render: function(data) {
                             return data ? new Date(data).toLocaleDateString('id-ID') : '-';
                         }
                     },
-                    { 
+                    {
                         data: 'docter',
                         render: function(data) {
                             return data || '-';
                         }
                     },
-                    { 
+                    {
                         data: 'batch_number',
                         render: function(data) {
                             return data || '-';
                         }
                     },
-                    { 
+                    {
                         data: 'expired_date',
                         render: function(data) {
                             return data ? new Date(data).toLocaleDateString('id-ID') : '-';
                         }
                     },
-                    { 
+                    {
                         data: 'next_booster',
                         render: function(data) {
                             return data ? new Date(data).toLocaleDateString('id-ID') : '-';
                         }
                     },
-                    { 
+                    {
                         data: 'dease_target',
                         render: function(data) {
                             return data || '-';
@@ -225,7 +225,8 @@
                     {
                         data: null,
                         render: function(data, type, row) {
-                            let noDoc = row?.biodata?.no_document ?? ""; // kalau null jadinya string kosong
+                            let noDoc = row?.biodata?.no_document ??
+                            ""; // kalau null jadinya string kosong
 
                             return `
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
@@ -335,7 +336,7 @@
             // View button click - redirect to check document
             $(document).on('click', '.btn-view', function() {
                 const no_document = $(this).data('id');
-                window.open(`/welcome/check_document?t=${no_document}`, '_blank');
+                window.open(`/index.php/welcome/check_document?t=${no_document}`, '_blank');
             });
 
             // Download PDF button click
@@ -359,7 +360,8 @@
                     if (response.success) {
                         let options = '<option value="">Pilih Pasien</option>';
                         response.data.forEach(function(item) {
-                            options += `<option value="${item.id}">${item.patient_name} - ${item.no_document}</option>`;
+                            options +=
+                                `<option value="${item.id}">${item.patient_name} - ${item.no_document}</option>`;
                         });
                         $('#id_biodata').html(options);
                     }
@@ -393,7 +395,7 @@
                         isEdit = true;
                         currentId = id;
                         $('#modalTitle').text('Edit Sertifikat Vaksin');
-                        
+
                         // Fill form
                         $('#id_biodata').val(data.id_biodata);
                         $('#vaccine_name').val(data.vaccine_name);
@@ -403,7 +405,7 @@
                         $('#expired_date').val(data.expired_date);
                         $('#next_booster').val(data.next_booster);
                         $('#dease_target').val(data.dease_target);
-                        
+
                         $('#certificateModal').modal('show');
                     }
                 })
@@ -421,9 +423,9 @@
             const formData = $('#certificateForm').serialize();
             const url = isEdit ? `/api/dashboard/certificate/${currentId}` : "/api/dashboard/certificate";
             const method = isEdit ? 'PUT' : 'POST';
-            
+
             $('#btnSubmit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
-            
+
             $.ajax({
                 url: url,
                 type: method,
@@ -448,10 +450,11 @@
                             // Clear previous errors
                             $('.help-block').remove();
                             $('.form-group').removeClass('has-error');
-                            
+
                             // Show new errors
                             for (let field in response.data) {
-                                const errorElement = $(`<span class="help-block text-red">${response.data[field][0]}</span>`);
+                                const errorElement = $(
+                                    `<span class="help-block text-red">${response.data[field][0]}</span>`);
                                 $(`#${field}`).after(errorElement);
                                 $(`#${field}`).closest('.form-group').addClass('has-error');
                             }

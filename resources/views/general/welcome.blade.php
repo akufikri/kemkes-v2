@@ -257,7 +257,9 @@
                         </style>
                         <div class="row">
                             {{-- start : not found data --}}
-                            <div id="not-found-message" style="display: none;"><p class="h3">Maaf, dokumen yang Anda cari tidak dapat Kami temukan.</p></div>
+                            <div id="not-found-message" style="display: none;">
+                                <p class="h3">Maaf, dokumen yang Anda cari tidak dapat Kami temukan.</p>
+                            </div>
                             {{-- end : not found data --}}
 
                             <div id="certificate-content" class="col-md-6 col-md-offset-4 icv">
@@ -330,7 +332,8 @@
                                             </thead>
                                             <tbody id="certificate-table-body">
                                                 <tr>
-                                                    <td colspan="5" class="text-center">Loading certificate data...</td>
+                                                    <td colspan="5" class="text-center">Loading certificate data...
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -432,31 +435,31 @@
         integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
         data-cf-beacon='{"rayId":"9789277e9bef4abd","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"e2a765f324f4412da187da8b414d804f"}'
         crossorigin="anonymous"></script>
-    
+
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             const urlParams = new URLSearchParams(window.location.search);
             let params = urlParams.get('t');
-            
-            if(!params) {
+
+            if (!params) {
                 params = urlParams.get('no_document');
             }
-            
+
             let noDocument = params;
-            
+
             // Set default value from URL parameter
             if (noDocument) {
                 $("#no_dokumen").val(noDocument);
             }
-            
-            function checkDocument() { 
+
+            function checkDocument() {
                 $.ajax({
                     type: "GET",
                     url: "/api/v1/checkNoDocument/" + noDocument,
                     dataType: "JSON",
-                    success: function (response) {
+                    success: function(response) {
                         console.log(response);
-                        
+
                         // If response data is 0, switch to no_document parameter
                         if (response.data === 0) {
                             const newParams = urlParams.get('no_document');
@@ -469,81 +472,86 @@
                         }
                     }
                 });
-             }
+            }
 
-             checkDocument()
+            checkDocument()
 
             const sensorText = (text) => {
                 if (!text || text.length <= 3) return text;
                 return text.substring(0, text.length - 3) + '***';
             }
-            
+
             function loadCertificate(documentNumber = null) {
                 const docNumber = documentNumber || noDocument || $("#no_dokumen").val().trim();
                 if (docNumber) {
                     // Get selected document type name
                     const selectedDocType = $("#jenis_dokumen option:selected").text();
-                    const docTypeParam = selectedDocType && selectedDocType !== '--Pilih--' ? `&type_document=${encodeURIComponent(selectedDocType)}` : '';
-                    
+                    const docTypeParam = selectedDocType && selectedDocType !== '--Pilih--' ?
+                        `&type_document=${encodeURIComponent(selectedDocType)}` : '';
+
                     $.ajax({
                         type: "GET",
                         url: `/api/v1/get/certificate?no_document=${docNumber}${docTypeParam}`,
                         dataType: "JSON",
                         beforeSend: function() {
-                            $("#certificate-table-body").html('<tr><td colspan="5" class="text-center">Loading...</td></tr>');
+                            $("#certificate-table-body").html(
+                                '<tr><td colspan="5" class="text-center">Loading...</td></tr>');
                         },
-                        success: function (res) {
-                           console.log('API Response:', res);
-                           
-                           if (res.success && res.data) {
-                               // Hide not found message and show certificate content
-                               $("#not-found-message").hide();
-                               $("#certificate-content").show();
-                               $("#result-block").show();
-                               
-                               // Fill patient data
-                               $("#no_document").text(res.data.no_document);
-                               const patientName = sensorText(res.data.patient_name.toUpperCase());
-                               const passportPatient = sensorText(res.data.nationality_doc)
-                               $("#patient_name").text(patientName);
-                               $("#passport").text(passportPatient);
-                               $("#birth").text(res.data.date_of_birth);
-                               
-                               // Generate QR code
-                               if (res.data.url_qr_code) {
-                                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=10&data=${encodeURIComponent(res.data.url_qr_code)}`;
-                                   $("#qr_certificate").attr('src', qrUrl);
-                               }
-                               
-                               // Load certificate data
-                               if (res.data.certificate && res.data.certificate.length > 0) {
-                                   let certificateRows = '';
-                                   res.data.certificate.forEach(function(cert) {
-                                       certificateRows += `
+                        success: function(res) {
+                            console.log('API Response:', res);
+
+                            if (res.success && res.data) {
+                                // Hide not found message and show certificate content
+                                $("#not-found-message").hide();
+                                $("#certificate-content").show();
+                                $("#result-block").show();
+
+                                // Fill patient data
+                                $("#no_document").text(res.data.no_document);
+                                const patientName = sensorText(res.data.patient_name.toUpperCase());
+                                const passportPatient = sensorText(res.data.nationality_doc)
+                                $("#patient_name").text(patientName);
+                                $("#passport").text(passportPatient);
+                                $("#birth").text(res.data.date_of_birth);
+
+                                // Generate QR code
+                                if (res.data.url_qr_code) {
+                                    const qrUrl =
+                                        `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=10&data=${encodeURIComponent(res.data.url_qr_code)}`;
+                                    $("#qr_certificate").attr('src', qrUrl);
+                                }
+
+                                // Load certificate data
+                                if (res.data.certificate && res.data.certificate.length > 0) {
+                                    let certificateRows = '';
+                                    res.data.certificate.forEach(function(cert) {
+                                        certificateRows += `
                                            <tr>
                                                <td class="text-bold">${cert.vaccine_name.toUpperCase()}</td>
                                                <td>${cert.batch_number}</td>
                                                <td>${cert.start_date}</td>
                                                <td>${cert.expired_date}</td>
-                                               <td>${cert.facility} ${cert.docter}</td>
+                                               <td>${cert.facility} <br/> ${cert.docter}</td>
                                            </tr>
                                        `;
-                                   });
-                                   $("#certificate-table-body").html(certificateRows);
-                               } else {
-                                   $("#certificate-table-body").html('<tr><td colspan="5" class="text-center">No certificate data available</td></tr>');
-                               }
-                           } else {
-                               // Show not found message and hide certificate content
-                               $("#certificate-content").hide();
-                               $("#not-found-message").show();
-                               $("#result-block").show();
-                           }
+                                    });
+                                    $("#certificate-table-body").html(certificateRows);
+                                } else {
+                                    $("#certificate-table-body").html(
+                                        '<tr><td colspan="5" class="text-center">No certificate data available</td></tr>'
+                                        );
+                                }
+                            } else {
+                                // Show not found message and hide certificate content
+                                $("#certificate-content").hide();
+                                $("#not-found-message").show();
+                                $("#result-block").show();
+                            }
                         },
                         error: function(xhr, status, error) {
                             console.error('Error fetching certificate:', error);
                             console.error('XHR:', xhr);
-                            
+
                             if (xhr.status === 404) {
                                 // Show not found message and hide certificate content for 404
                                 $("#certificate-content").hide();
@@ -555,30 +563,36 @@
                                 if (xhr.status === 500) {
                                     errorMessage = 'Server error';
                                 }
-                                
+
                                 $("#not-found-message").hide();
                                 $("#certificate-content").show();
                                 $("#result-block").show();
-                                $("#certificate-table-body").html(`<tr><td colspan="5" class="text-center text-danger">${errorMessage}</td></tr>`);
+                                $("#certificate-table-body").html(
+                                    `<tr><td colspan="5" class="text-center text-danger">${errorMessage}</td></tr>`
+                                    );
                             }
                         }
                     });
                 } else {
                     console.error('No document number provided');
-                    $("#certificate-table-body").html('<tr><td colspan="5" class="text-center">Please enter a document number</td></tr>');
+                    $("#certificate-table-body").html(
+                        '<tr><td colspan="5" class="text-center">Please enter a document number</td></tr>');
                 }
             }
-            
+
             // Load document types on page load
             $.ajax({
                 type: "GET",
                 url: "/api/dashboard/type/document",
                 dataType: "JSON",
-                success: function (res) {
+                success: function(res) {
                     if (res.data && res.data.length > 0) {
                         res.data.forEach(function(docType) {
-                            const selected = docType.name.toLowerCase() === 'icv' ? 'selected' : '';
-                            $("#jenis_dokumen").append(`<option value="${docType.id}" ${selected}>${docType.name}</option>`);
+                            const selected = docType.name.toLowerCase() === 'icv' ? 'selected' :
+                                '';
+                            $("#jenis_dokumen").append(
+                                `<option value="${docType.id}" ${selected}>${docType.name}</option>`
+                                );
                         });
                         // Load certificate after document types are loaded
                         loadCertificate();
@@ -588,7 +602,7 @@
                     console.error('Error fetching document types:', error);
                 }
             });
-            
+
             // Handle search button click
             $("#btn_cari").on("click", function(e) {
                 e.preventDefault();
@@ -599,7 +613,7 @@
                     alert("Silakan masukkan nomor dokumen terlebih dahulu");
                 }
             });
-            
+
             // Handle Enter key on input
             $("#no_dokumen").on("keypress", function(e) {
                 if (e.which == 13) {

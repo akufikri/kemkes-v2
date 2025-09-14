@@ -196,7 +196,7 @@ class CertificateController extends Controller
                 'certificates' => $certificates,
                 'qrCodeUrl' => $qrCodeUrl
             ]);
-
+            // $pdf->set_option('isRemoteEnabled', true);
             $pdf->setPaper('A4', 'portrait');
 
             $filename =  ucwords($biodata->patient_name) . '.pdf';
