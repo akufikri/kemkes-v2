@@ -99,9 +99,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="expired_date">Tanggal Kadaluarsa <span class="text-red">*</span></label>
-                                    <input type="date" class="form-control" id="expired_date" name="expired_date"
-                                        required>
+                                    <label for="expired_date">Tanggal Kadaluarsa <span class="text-red">(opsional)</span></label>
+                                    <input type="date" class="form-control" id="expired_date" name="expired_date">
                                     <span class="help-block text-red" id="expired_date_error"></span>
                                 </div>
                             </div>
@@ -226,7 +225,7 @@
                         data: null,
                         render: function(data, type, row) {
                             let noDoc = row?.biodata?.no_document ??
-                            ""; // kalau null jadinya string kosong
+                                ""; // kalau null jadinya string kosong
 
                             return `
                                 <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
@@ -272,7 +271,7 @@
                         maxlength: 255
                     },
                     expired_date: {
-                        required: true,
+                        // required: false,
                         date: true
                     },
                     next_booster: {
@@ -288,7 +287,7 @@
                         date: "Format tanggal tidak valid"
                     },
                     expired_date: {
-                        required: "Tanggal kadaluarsa wajib diisi",
+                        // required: "Tanggal kadaluarsa wajib diisi",
                         date: "Format tanggal tidak valid"
                     },
                     next_booster: {

@@ -43,7 +43,7 @@ class CertificateController extends Controller
                 'start_date' => 'required|date',
                 'docter' => 'nullable|string|max:255',
                 'batch_number' => 'nullable|string|max:255',
-                'expired_date' => 'required|date',
+                'expired_date' => 'nullable|date',
                 'next_booster' => 'nullable|date',
                 'dease_target' => 'nullable|string'
             ]);
@@ -78,7 +78,7 @@ class CertificateController extends Controller
                 'start_date' => 'sometimes|required|date',
                 'docter' => 'nullable|string|max:255',
                 'batch_number' => 'nullable|string|max:255',
-                'expired_date' => 'sometimes|required|date',
+                'expired_date' => 'sometimes|date',
                 'next_booster' => 'nullable|date',
                 'dease_target' => 'nullable|string'
             ]);
@@ -178,7 +178,18 @@ class CertificateController extends Controller
 
             $certificates = [];
             if ($biodata->certificate) {
-                foreach ($biodata->certificate as $certificate) {
+                // Custom sorting: MENINGITIS first, then by created_at desc
+                $sortedCertificates = $biodata->certificate->sort(function ($a, $b) {
+                    $aHasMeningitis = stripos($a->vaccine_name, 'MENINGITIS') !== false;
+                    $bHasMeningitis = stripos($b->vaccine_name, 'MENINGITIS') !== false;
+
+                    if ($aHasMeningitis && !$bHasMeningitis) return -1;
+                    if (!$aHasMeningitis && $bHasMeningitis) return 1;
+
+                    return $b->created_at <=> $a->created_at;
+                })->values(); // Reset array keys
+
+                foreach ($sortedCertificates as $certificate) {
                     $certificate->start_date = DateHelper::formatDate($certificate->start_date);
                     $certificate->expired_date = DateHelper::formatDate($certificate->expired_date);
                     $certificate->next_booster = DateHelper::formatDate($certificate->next_booster);
@@ -196,10 +207,9 @@ class CertificateController extends Controller
                 'certificates' => $certificates,
                 'qrCodeUrl' => $qrCodeUrl
             ]);
-            // $pdf->set_option('isRemoteEnabled', true);
             $pdf->setPaper('A4', 'portrait');
 
-            $filename =  ucwords($biodata->patient_name) . '.pdf';
+            $filename = ucwords($biodata->patient_name) . '.pdf';
 
             return $pdf->download($filename);
         } catch (\Exception $e) {
@@ -209,6 +219,7 @@ class CertificateController extends Controller
             ], 500);
         }
     }
+
 
     public function checkNoDocument($params)
     {
