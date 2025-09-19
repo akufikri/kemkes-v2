@@ -11,6 +11,7 @@
 @push('style')
     <link rel="stylesheet" href="{{ asset('template/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endpush
 @section('content')
     <div class="box box-default">
@@ -59,7 +60,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="id_biodata">Pasien <span class="text-red">*</span></label>
-                                    <select class="form-control" id="id_biodata" name="id_biodata" required>
+                                    <select class="form-control" id="id_biodata" name="id_biodata" required
+                                        style="width: 100%;">
                                         <option value="">Pilih Pasien</option>
                                     </select>
                                     <span class="help-block text-red" id="id_biodata_error"></span>
@@ -99,7 +101,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="expired_date">Tanggal Kadaluarsa <span class="text-red">(opsional)</span></label>
+                                    <label for="expired_date">Tanggal Kadaluarsa <span
+                                            class="text-red">(opsional)</span></label>
                                     <input type="date" class="form-control" id="expired_date" name="expired_date">
                                     <span class="help-block text-red" id="expired_date_error"></span>
                                 </div>
@@ -138,38 +141,72 @@
     <script src="{{ asset('template/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         let certificateTable;
         let currentId = null;
         let isEdit = false;
+        let searchTimeout = null; // buat debounce
 
         $(document).ready(function() {
             // Initialize DataTable
             certificateTable = $('#certificateTable').DataTable({
                 processing: true,
-                serverSide: false,
-                ajax: {
-                    url: "/api/dashboard/certificate",
-                    type: "GET",
-                    dataSrc: function(json) {
-                        if (json.success) {
-                            return json.data;
-                        }
-                        return [];
-                    },
-                    error: function(xhr) {
-                        console.error('Error loading data:', xhr);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Error loading data'
+                serverSide: true,
+                ajax: function(data, callback, settings) {
+                    const page = Math.floor(data.start / data.length) + 1;
+                    const perPage = data.length;
+
+                    // clear timeout sebelumnya
+                    clearTimeout(searchTimeout);
+
+                    // set delay sebelum request ke server
+                    searchTimeout = setTimeout(() => {
+                        $.ajax({
+                            url: "/api/dashboard/certificate",
+                            type: "GET",
+                            data: {
+                                is_compress: true,
+                                search: data.search.value,
+                                page: page,
+                                per_page: perPage
+                            },
+                            success: function(res) {
+                                if (res.success) {
+                                    callback({
+                                        data: res.data.data,
+                                        recordsTotal: res.data.total,
+                                        recordsFiltered: res.data.total
+                                    });
+                                } else {
+                                    callback({
+                                        data: [],
+                                        recordsTotal: 0,
+                                        recordsFiltered: 0
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                console.error('Error loading data:', xhr);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Error loading data'
+                                });
+                                callback({
+                                    data: [],
+                                    recordsTotal: 0,
+                                    recordsFiltered: 0
+                                });
+                            }
                         });
-                    }
+                    }, 500); // delay 500ms
                 },
                 columns: [{
                         data: null,
                         render: function(data, type, row, meta) {
-                            return meta.row + 1;
+                            return meta.row + meta.settings._iDisplayStart + 1;
                         },
                         orderable: false
                     },
@@ -224,34 +261,69 @@
                     {
                         data: null,
                         render: function(data, type, row) {
-                            let noDoc = row?.biodata?.no_document ??
-                                ""; // kalau null jadinya string kosong
-
+                            let noDoc = row?.biodata?.no_document ?? "";
                             return `
-                                <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
-                                    <i class="fa fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-sm btn-info btn-view text-black" data-id="${noDoc}">
-                                    <i class="fa fa-eye"></i> View
-                                </button>
-                                <button class="btn btn-sm btn-success text-white btn-download" data-id="${noDoc}">
-                                    <i class="fa fa-file-pdf-o"></i> Download PDF
-                                </button>
-                                <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
-                                    <i class="fa fa-trash"></i> Hapus
-                                </button>
-                            `;
+                        <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
+                            <i class="fa fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-info btn-view text-black" data-id="${noDoc}">
+                            <i class="fa fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-success text-white btn-download" data-id="${noDoc}">
+                            <i class="fa fa-file-pdf-o"></i> Download PDF
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
+                            <i class="fa fa-trash"></i> Hapus
+                        </button>
+                    `;
                         },
                         orderable: false
                     }
-
                 ]
             });
 
-            // Load biodata for select option
-            loadBiodata();
+            // Init select2 pasien dengan pagination
+            $('#id_biodata').select2({
+                placeholder: "Pilih Pasien",
+                allowClear: true,
+                width: '100%',
+                ajax: {
+                    url: "/api/dashboard/biodata",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            is_compress: true,
+                            search: params.term || "",
+                            page: params.page || 1,
+                            per_page: 10
+                        };
+                    },
+                    processResults: function(res, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: $.map(res.data.data, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.patient_name + " - " + item.no_document
+                                };
+                            }),
+                            pagination: {
+                                more: res.data.current_page < res.data.last_page
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                language: {
+                    inputTooShort: () => "Ketik minimal 1 huruf untuk mencari",
+                    searching: () => "Mencari...",
+                    loadingMore: () => "Memuat lebih banyak...",
+                    noResults: () => "Tidak ada hasil ditemukan"
+                }
+            });
 
-            // Initialize form validation
+            // Form validation
             $('#certificateForm').validate({
                 rules: {
                     id_biodata: {
@@ -271,7 +343,6 @@
                         maxlength: 255
                     },
                     expired_date: {
-                        // required: false,
                         date: true
                     },
                     next_booster: {
@@ -287,7 +358,6 @@
                         date: "Format tanggal tidak valid"
                     },
                     expired_date: {
-                        // required: "Tanggal kadaluarsa wajib diisi",
                         date: "Format tanggal tidak valid"
                     },
                     next_booster: {
@@ -311,7 +381,7 @@
                 }
             });
 
-            // Add button click
+            // Add
             $('#btnAdd').on('click', function() {
                 resetForm();
                 isEdit = false;
@@ -320,25 +390,25 @@
                 $('#certificateModal').modal('show');
             });
 
-            // Edit button click
+            // Edit
             $(document).on('click', '.btn-edit', function() {
                 const id = $(this).data('id');
                 editCertificate(id);
             });
 
-            // Delete button click
+            // Delete
             $(document).on('click', '.btn-delete', function() {
                 const id = $(this).data('id');
                 deleteCertificate(id);
             });
 
-            // View button click - redirect to check document
+            // View
             $(document).on('click', '.btn-view', function() {
                 const no_document = $(this).data('id');
                 window.open(`/index.php/welcome/check_document?t=${no_document}`, '_blank');
             });
 
-            // Download PDF button click
+            // Download PDF
             $(document).on('click', '.btn-download', function() {
                 const no_document = $(this).data('id');
                 if (no_document) {
@@ -353,32 +423,12 @@
             });
         });
 
-        function loadBiodata() {
-            $.get("/api/dashboard/biodata")
-                .done(function(response) {
-                    if (response.success) {
-                        let options = '<option value="">Pilih Pasien</option>';
-                        response.data.forEach(function(item) {
-                            options +=
-                                `<option value="${item.id}">${item.patient_name} - ${item.no_document}</option>`;
-                        });
-                        $('#id_biodata').html(options);
-                    }
-                })
-                .fail(function() {
-                    console.error('Failed to load biodata');
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Gagal memuat data pasien'
-                    });
-                });
-        }
-
+        // Helpers
         function resetForm() {
             $('#certificateForm')[0].reset();
             $('#certificateForm').validate().resetForm();
             clearErrors();
+            $('#id_biodata').val(null).trigger('change');
         }
 
         function clearErrors() {
@@ -395,8 +445,7 @@
                         currentId = id;
                         $('#modalTitle').text('Edit Sertifikat Vaksin');
 
-                        // Fill form
-                        $('#id_biodata').val(data.id_biodata);
+                        $('#id_biodata').val(data.id_biodata).trigger('change');
                         $('#vaccine_name').val(data.vaccine_name);
                         $('#start_date').val(data.start_date);
                         $('#docter').val(data.docter);
@@ -446,11 +495,8 @@
                     if (xhr.status === 422) {
                         const response = JSON.parse(xhr.responseText);
                         if (response.data) {
-                            // Clear previous errors
                             $('.help-block').remove();
                             $('.form-group').removeClass('has-error');
-
-                            // Show new errors
                             for (let field in response.data) {
                                 const errorElement = $(
                                     `<span class="help-block text-red">${response.data[field][0]}</span>`);

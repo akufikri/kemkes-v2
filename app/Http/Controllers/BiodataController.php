@@ -19,10 +19,38 @@ class BiodataController extends Controller
     public function index()
     {
         try {
-            $biodatas = Biodata::with('typeDocument')
-            ->latest()
-            ->get();
-            return $this->success($biodatas, 'Data biodata berhasil diambil', 200);
+            $is_compres = request()->boolean('is_compres', false);
+
+            $query = Biodata::with('typeDocument')->latest();
+
+            if ($is_compres) {
+                $search   = request()->input('search');
+                $perPage  = request()->input('per_page', 10);
+
+                $query->select('id', 'patient_name', 'no_document');
+
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('patient_name', 'like', "%{$search}%")
+                            ->orWhere('no_document', 'like', "%{$search}%");
+                    });
+                }
+
+                $biodatas = $query->paginate($perPage);
+
+                // Tambahkan pagination ke response
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data biodata berhasil diambil',
+                    'data' => $biodatas->items(),
+                    'pagination' => [
+                        'more' => $biodatas->hasMorePages()
+                    ]
+                ], 200);
+            } else {
+                $biodatas = $query->get();
+                return $this->success($biodatas, 'Data biodata berhasil diambil', 200);
+            }
         } catch (\Exception $e) {
             return $this->error('Gagal mengambil data biodata', null, 500);
         }
@@ -96,8 +124,14 @@ class BiodataController extends Controller
             ]);
 
             $updateData = $request->only([
-                'no_document', 'patient_name', 'sex', 'date_of_birth',
-                'nationality', 'nationality_doc', 'disease', 'facility',
+                'no_document',
+                'patient_name',
+                'sex',
+                'date_of_birth',
+                'nationality',
+                'nationality_doc',
+                'disease',
+                'facility',
                 'id_type_document'
             ]);
 
@@ -131,14 +165,14 @@ class BiodataController extends Controller
             return $this->error('Gagal menghapus data biodata', null, 500);
         }
     }
-    
+
     // public function getBiodata($no_document)
     // {
     //     try {
     //         $data = Biodata::where('no_document', $no_document)
     //         ->with('certificate')
     //         ->first();
-            
+
     //         return $this->success($data, "Sukses mendapatkan data biodata", 200);
     //     } catch (\Exception $e){
     //         return $this->error("Gagal memuat data, tunggu beberapa saat", 500);

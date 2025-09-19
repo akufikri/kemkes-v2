@@ -25,11 +25,47 @@ class CertificateController extends Controller
      */
     public function index(): JsonResponse
     {
-        $certificates = Certificate::with('biodata')
-            ->latest()
-            ->get();
-        return $this->success($certificates, 'Certificates retrieved successfully', 200);
+        try {
+            $is_compress = request()->boolean('is_compress', false);
+            $search = request()->input('search'); // ambil query pencarian kalau ada
+
+            $query = Certificate::with(['biodata:id,patient_name,no_document'])
+                ->latest();
+
+            if ($is_compress) {
+                // filter pencarian
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->whereHas('biodata', function ($q2) use ($search) {
+                            $q2->where('patient_name', 'like', "%{$search}%")
+                                ->orWhere('no_document', 'like', "%{$search}%");
+                        })->orWhere('vaccine_name', 'like', "%{$search}%");
+                    });
+                }
+
+                // pilih hanya kolom yang dibutuhkan + paginate 10
+                $certificates = $query->select([
+                    'id',
+                    'id_biodata',
+                    'vaccine_name',
+                    'start_date',
+                    'docter',
+                    'batch_number',
+                    'expired_date',
+                    'next_booster',
+                    'dease_target'
+                ])->paginate(10);
+            } else {
+                // fallback: ambil semua kolom (misal untuk export)
+                $certificates = $query->get();
+            }
+
+            return $this->success($certificates, 'Certificates retrieved successfully', 200);
+        } catch (\Exception $e) {
+            return $this->error('Failed to retrieve certificates', $e->getMessage(), 500);
+        }
     }
+
 
     /**
      * Store a newly created certificate
@@ -78,7 +114,7 @@ class CertificateController extends Controller
                 'start_date' => 'sometimes|required|date',
                 'docter' => 'nullable|string|max:255',
                 'batch_number' => 'nullable|string|max:255',
-                'expired_date' => 'sometimes|date',
+                'expired_date' => 'nullable|date',
                 'next_booster' => 'nullable|date',
                 'dease_target' => 'nullable|string'
             ]);
