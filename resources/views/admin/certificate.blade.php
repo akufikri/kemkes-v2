@@ -144,13 +144,15 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        let certificateTable;
-        let currentId = null;
-        let isEdit = false;
-        let searchTimeout = null; // buat debounce
-
         $(document).ready(function() {
+            let certificateTable;
+            let currentId = null;
+            let isEdit = false;
+            let searchTimeout = null; // debounce
+
+            // =========================
             // Initialize DataTable
+            // =========================
             certificateTable = $('#certificateTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -158,10 +160,8 @@
                     const page = Math.floor(data.start / data.length) + 1;
                     const perPage = data.length;
 
-                    // clear timeout sebelumnya
                     clearTimeout(searchTimeout);
 
-                    // set delay sebelum request ke server
                     searchTimeout = setTimeout(() => {
                         $.ajax({
                             url: "/api/dashboard/certificate",
@@ -175,9 +175,12 @@
                             success: function(res) {
                                 if (res.success) {
                                     callback({
-                                        data: res.data.data,
-                                        recordsTotal: res.data.total,
-                                        recordsFiltered: res.data.total
+                                        data: res.data.data || res
+                                            .data, // fallback jika tidak ada nested data
+                                        recordsTotal: res.data.total || res
+                                            .data.length,
+                                        recordsFiltered: res.data.total ||
+                                            res.data.length
                                     });
                                 } else {
                                     callback({
@@ -201,7 +204,7 @@
                                 });
                             }
                         });
-                    }, 500); // delay 500ms
+                    }, 500);
                 },
                 columns: [{
                         data: null,
@@ -263,18 +266,10 @@
                         render: function(data, type, row) {
                             let noDoc = row?.biodata?.no_document ?? "";
                             return `
-                        <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}">
-                            <i class="fa fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-info btn-view text-black" data-id="${noDoc}">
-                            <i class="fa fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-sm btn-success text-white btn-download" data-id="${noDoc}">
-                            <i class="fa fa-file-pdf-o"></i> Download PDF
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">
-                            <i class="fa fa-trash"></i> Hapus
-                        </button>
+                        <button class="btn btn-sm btn-warning btn-edit" data-id="${row.id}"><i class="fa fa-edit"></i> Edit</button>
+                        <button class="btn btn-sm btn-info btn-view text-black" data-id="${noDoc}"><i class="fa fa-eye"></i> View</button>
+                        <button class="btn btn-sm btn-success text-white btn-download" data-id="${noDoc}"><i class="fa fa-file-pdf-o"></i> Download PDF</button>
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}"><i class="fa fa-trash"></i> Hapus</button>
                     `;
                         },
                         orderable: false
@@ -282,7 +277,9 @@
                 ]
             });
 
-            // Init select2 pasien dengan pagination
+            // =========================
+            // Initialize Select2
+            // =========================
             $('#id_biodata').select2({
                 placeholder: "Pilih Pasien",
                 allowClear: true,
@@ -302,14 +299,14 @@
                     processResults: function(res, params) {
                         params.page = params.page || 1;
                         return {
-                            results: $.map(res.data.data, function(item) {
+                            results: $.map(res.data, function(item) { // gunakan res.data langsung
                                 return {
                                     id: item.id,
                                     text: item.patient_name + " - " + item.no_document
                                 };
                             }),
                             pagination: {
-                                more: res.data.current_page < res.data.last_page
+                                more: res.pagination?.more || false
                             }
                         };
                     },
@@ -323,7 +320,9 @@
                 }
             });
 
+            // =========================
             // Form validation
+            // =========================
             $('#certificateForm').validate({
                 rules: {
                     id_biodata: {
@@ -381,7 +380,9 @@
                 }
             });
 
-            // Add
+            // =========================
+            // Button Actions
+            // =========================
             $('#btnAdd').on('click', function() {
                 resetForm();
                 isEdit = false;
@@ -390,62 +391,59 @@
                 $('#certificateModal').modal('show');
             });
 
-            // Edit
             $(document).on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-                editCertificate(id);
+                editCertificate($(this).data('id'));
             });
-
-            // Delete
             $(document).on('click', '.btn-delete', function() {
-                const id = $(this).data('id');
-                deleteCertificate(id);
+                deleteCertificate($(this).data('id'));
             });
-
-            // View
             $(document).on('click', '.btn-view', function() {
-                const no_document = $(this).data('id');
-                window.open(`/index.php/welcome/check_document?t=${no_document}`, '_blank');
+                window.open(`/index.php/welcome/check_document?t=${$(this).data('id')}`, '_blank');
             });
-
-            // Download PDF
             $(document).on('click', '.btn-download', function() {
                 const no_document = $(this).data('id');
-                if (no_document) {
-                    window.open(`/api/v1/download/certificate/${no_document}`, '_blank');
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Nomor dokumen tidak ditemukan'
-                    });
-                }
+                if (no_document) window.open(`/api/v1/download/certificate/${no_document}`, '_blank');
+                else Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Nomor dokumen tidak ditemukan'
+                });
             });
-        });
 
-        // Helpers
-        function resetForm() {
-            $('#certificateForm')[0].reset();
-            $('#certificateForm').validate().resetForm();
-            clearErrors();
-            $('#id_biodata').val(null).trigger('change');
-        }
+            // =========================
+            // Helper functions
+            // =========================
+            function resetForm() {
+                $('#certificateForm')[0].reset();
+                $('#certificateForm').validate().resetForm();
+                $('.help-block').remove();
+                $('.form-group').removeClass('has-error');
+                $('#id_biodata').val(null).trigger('change');
+            }
 
-        function clearErrors() {
-            $('.help-block').remove();
-            $('.form-group').removeClass('has-error');
-        }
-
-        function editCertificate(id) {
-            $.get(`/api/dashboard/certificate/${id}`)
-                .done(function(response) {
+            function editCertificate(id) {
+                $.get(`/api/dashboard/certificate/${id}`).done(function(response) {
                     if (response.success) {
                         const data = response.data;
                         isEdit = true;
                         currentId = id;
                         $('#modalTitle').text('Edit Sertifikat Vaksin');
 
-                        $('#id_biodata').val(data.id_biodata).trigger('change');
+                        // ===============================
+                        // Set pasien di Select2 secara manual
+                        // ===============================
+                        if (data.biodata) {
+                            const option = new Option(
+                                data.biodata.patient_name + " - " + data.biodata.no_document,
+                                data.biodata.id,
+                                true, // selected
+                                true // selected
+                            );
+                            $('#id_biodata').append(option).trigger('change');
+                        } else {
+                            $('#id_biodata').val(null).trigger('change');
+                        }
+
                         $('#vaccine_name').val(data.vaccine_name);
                         $('#start_date').val(data.start_date);
                         $('#docter').val(data.docter);
@@ -456,106 +454,104 @@
 
                         $('#certificateModal').modal('show');
                     }
-                })
-                .fail(function(xhr) {
-                    console.error('Error:', xhr);
+                }).fail(function(xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
                         text: 'Gagal mengambil data sertifikat'
                     });
                 });
-        }
+            }
 
-        function saveCertificate() {
-            const formData = $('#certificateForm').serialize();
-            const url = isEdit ? `/api/dashboard/certificate/${currentId}` : "/api/dashboard/certificate";
-            const method = isEdit ? 'PUT' : 'POST';
+            function saveCertificate() {
+                const formData = $('#certificateForm').serialize();
+                const url = isEdit ? `/api/dashboard/certificate/${currentId}` : "/api/dashboard/certificate";
+                const method = isEdit ? 'PUT' : 'POST';
 
-            $('#btnSubmit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+                $('#btnSubmit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
-            $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        $('#certificateModal').modal('hide');
-                        certificateTable.ajax.reload();
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: response.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 422) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.data) {
+                $.ajax({
+                    url: url,
+                    type: method,
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#certificateModal').modal('hide');
+                            certificateTable.ajax.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const response = JSON.parse(xhr.responseText);
                             $('.help-block').remove();
                             $('.form-group').removeClass('has-error');
                             for (let field in response.data) {
                                 const errorElement = $(
-                                    `<span class="help-block text-red">${response.data[field][0]}</span>`);
+                                    `<span class="help-block text-red">${response.data[field][0]}</span>`
+                                );
                                 $(`#${field}`).after(errorElement);
                                 $(`#${field}`).closest('.form-group').addClass('has-error');
                             }
-                        }
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan saat menyimpan data'
-                        });
-                    }
-                },
-                complete: function() {
-                    $('#btnSubmit').prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                }
-            });
-        }
-
-        function deleteCertificate(id) {
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data sertifikat yang dihapus tidak dapat dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/api/dashboard/certificate/${id}`,
-                        type: 'DELETE',
-                        success: function(response) {
-                            if (response.success) {
-                                certificateTable.ajax.reload();
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Terhapus!',
-                                    text: response.message,
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                });
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error('Error:', xhr);
+                        } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                text: 'Gagal menghapus data sertifikat'
+                                text: 'Terjadi kesalahan saat menyimpan data'
                             });
                         }
-                    });
-                }
-            });
-        }
+                    },
+                    complete: function() {
+                        $('#btnSubmit').prop('disabled', false).html(
+                            '<i class="fa fa-save"></i> Simpan');
+                    }
+                });
+            }
+
+            function deleteCertificate(id) {
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data sertifikat yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/api/dashboard/certificate/${id}`,
+                            type: 'DELETE',
+                            success: function(response) {
+                                if (response.success) {
+                                    certificateTable.ajax.reload();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Terhapus!',
+                                        text: response.message,
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Gagal menghapus data sertifikat'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
     </script>
 @endpush

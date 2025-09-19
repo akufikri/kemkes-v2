@@ -19,13 +19,13 @@ class BiodataController extends Controller
     public function index()
     {
         try {
-            $is_compres = request()->boolean('is_compres', false);
+            $is_compress = request()->boolean('is_compress', false);
 
             $query = Biodata::with('typeDocument')->latest();
 
-            if ($is_compres) {
-                $search   = request()->input('search');
-                $perPage  = request()->input('per_page', 10);
+            if ($is_compress) {
+                $search  = request()->input('search');
+                $perPage = request()->input('per_page', 10);
 
                 $query->select('id', 'patient_name', 'no_document');
 
@@ -38,7 +38,6 @@ class BiodataController extends Controller
 
                 $biodatas = $query->paginate($perPage);
 
-                // Tambahkan pagination ke response
                 return response()->json([
                     'success' => true,
                     'message' => 'Data biodata berhasil diambil',
@@ -55,6 +54,7 @@ class BiodataController extends Controller
             return $this->error('Gagal mengambil data biodata', null, 500);
         }
     }
+
 
     public function store(Request $request)
     {
