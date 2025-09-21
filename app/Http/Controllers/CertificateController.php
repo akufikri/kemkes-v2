@@ -27,13 +27,13 @@ class CertificateController extends Controller
     {
         try {
             $is_compress = request()->boolean('is_compress', false);
-            $search = request()->input('search'); // ambil query pencarian kalau ada
+            $search = request()->input('search');
+            $perPage = request()->input('per_page', 10); // 👈 Ambil dari request, default 10
 
             $query = Certificate::with(['biodata:id,patient_name,no_document'])
                 ->latest();
 
             if ($is_compress) {
-                // filter pencarian
                 if ($search) {
                     $query->where(function ($q) use ($search) {
                         $q->whereHas('biodata', function ($q2) use ($search) {
@@ -43,7 +43,6 @@ class CertificateController extends Controller
                     });
                 }
 
-                // pilih hanya kolom yang dibutuhkan + paginate 10
                 $certificates = $query->select([
                     'id',
                     'id_biodata',
@@ -54,9 +53,8 @@ class CertificateController extends Controller
                     'expired_date',
                     'next_booster',
                     'dease_target'
-                ])->paginate(10);
+                ])->paginate($perPage); // 👈 GUNAKAN $perPage DI SINI!
             } else {
-                // fallback: ambil semua kolom (misal untuk export)
                 $certificates = $query->get();
             }
 
@@ -65,7 +63,6 @@ class CertificateController extends Controller
             return $this->error('Failed to retrieve certificates', $e->getMessage(), 500);
         }
     }
-
 
     /**
      * Store a newly created certificate

@@ -62,14 +62,14 @@
 
         .icv .watermark {
             position: absolute;
-            top: 50%;
+            top: 41%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height: 190px;
-            opacity: 0.3;
+            height: 176px;
+            /* opacity: 0.3; */
             z-index: 0;
-            filter: grayscale(100%);
-            -webkit-filter: grayscale(100%);
+            /* filter: grayscale(100%);
+            -webkit-filter: grayscale(100%); */
             /* DomPDF fallback - just use moderate opacity */
         }
 
@@ -159,7 +159,7 @@
 
         .icv-table th {
             font-weight: normal;
-            background-color: rgba(232, 215, 156, 0.8);
+            background-color: #e7d69b;
             text-align: center;
         }
 
@@ -213,8 +213,9 @@
                         <table style="width: 100%">
                             <tbody>
                                 <tr>
-                                    <td style="padding-bottom: 56.5px; vertical-align: middle; padding-top: 25px">
-                                        <p class="text-secondary" style="font-size: 13px">
+                                    <td
+                                        style="padding-bottom: 82.5px; vertical-align: middle; padding-top: 25px; border:1px">
+                                        <p class="text-secondary" style="font-size: 13px;">
                                             <strong>{{ $biodata->patient_name }}</strong><br>
                                             Passport {{ $biodata->nationality_doc }} <br>
                                             {{ $biodata->date_of_birth }}
